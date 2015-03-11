@@ -36,6 +36,9 @@
     <ClCompile Include="WiiLib.cpp">
       <Filter>Source Files\Wii</Filter>
     </ClCompile>
+    <ClCompile Include="WiiMoteWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
@@ -46,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="WiiLib.h">
       <Filter>Header Files\Wii</Filter>
+    </ClInclude>
+    <ClInclude Include="WiiMoteWrapper.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
