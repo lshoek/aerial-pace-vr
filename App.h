@@ -5,6 +5,8 @@
 #include <VrLib\Kernel.h>
 #include <CaveLib\CaveLib.h>
 #include <GL\glew.h>
+#include <ctime>
+#include "Camera.h"
 
 class cTexture;
 
@@ -16,6 +18,8 @@ class App : public Application
 		DigitalDevice leftButton;
 		cTexture* brickwall_texture;
 		cModel* checkers_model;
+		Camera* camera;
+		GLint fps;
 
 	public:
 		App(void);
@@ -24,4 +28,7 @@ class App : public Application
 		virtual void preFrame(double, double);
 		virtual void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
 		void DrawBrickWall();
+
+	private:
+		clock_t clock_start = clock();
 };

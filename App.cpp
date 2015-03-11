@@ -20,10 +20,19 @@ void App::init(void)
 
 	brickwall_texture = CaveLib::loadTexture("data/CellStroll/textures/brickwall.jpg");
 	checkers_model = CaveLib::loadModel("data/CellStroll/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
+	camera = new Camera();
 }
 
-void App::preFrame(double, double totalTime)
+void App::preFrame(double frameTime, double totalTime)
 {
+	// timer
+	clock_t clock_end = clock();
+	GLfloat timeFctr = GLfloat(clock_end - clock_start) / CLOCKS_PER_SEC; // calculate time(s) elapsed since last frame
+	camera->tf = timeFctr;
+	fps = int(1 / timeFctr);
+	clock_start = clock();
+
+	// wand
 	glm::mat4 mat = wand.getData();
 }
 
@@ -36,6 +45,8 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glEnable(GL_TEXTURE_2D);
 	glTranslatef(-1.0f, 0.0f, -1.0f);
 	glScalef(5.0f, 5.0f, 5.0f);
+
+	std::cout << fps << "\n";
 
 	checkers_model->draw();
 	DrawBrickWall();
