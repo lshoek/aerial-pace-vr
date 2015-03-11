@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Wii">
+      <UniqueIdentifier>{8b1988ea-2209-404f-820c-42e26eac13b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Wii">
+      <UniqueIdentifier>{d388a50a-b458-407a-9aaf-63043c82cf43}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -24,6 +30,12 @@
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wiimote.cpp">
+      <Filter>Source Files\Wii</Filter>
+    </ClCompile>
+    <ClCompile Include="WiiLib.cpp">
+      <Filter>Source Files\Wii</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
@@ -31,6 +43,9 @@
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WiiLib.h">
+      <Filter>Header Files\Wii</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

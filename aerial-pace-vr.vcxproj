@@ -91,10 +91,13 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="WiiLib.cpp" />
+    <ClCompile Include="wiimote.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="WiiLib.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="simple.frag" />
