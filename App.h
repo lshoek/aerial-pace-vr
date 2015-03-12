@@ -6,6 +6,8 @@
 #include <CaveLib\CaveLib.h>
 #include <GL\glew.h>
 #include "WiiMoteWrapper.h"
+#include <ctime>
+#include "Camera.h"
 
 class cTexture;
 
@@ -18,6 +20,8 @@ class App : public Application
 		cTexture* brickwall_texture;
 		cModel* checkers_model;
 		WiiMoteWrapper * wiiMoteWrapper;
+		Camera* camera;
+		GLint fps;
 
 	public:
 		App(WiiMoteWrapper * w);
@@ -26,4 +30,7 @@ class App : public Application
 		virtual void preFrame(double, double);
 		virtual void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
 		void DrawBrickWall();
+
+	private:
+		clock_t clock_start = clock();
 };

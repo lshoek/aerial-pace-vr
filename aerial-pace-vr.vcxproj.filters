@@ -30,6 +30,7 @@
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="wiimote.cpp">
       <Filter>Source Files\Wii</Filter>
     </ClCompile>
@@ -37,6 +38,9 @@
       <Filter>Source Files\Wii</Filter>
     </ClCompile>
     <ClCompile Include="WiiMoteWrapper.cpp">
+=======
+    <ClCompile Include="Camera.cpp">
+>>>>>>> 3cffc7d3bcff85961bab8b835f12338520698bd7
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,10 +51,14 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="WiiLib.h">
       <Filter>Header Files\Wii</Filter>
     </ClInclude>
     <ClInclude Include="WiiMoteWrapper.h">
+=======
+    <ClInclude Include="Camera.h">
+>>>>>>> 3cffc7d3bcff85961bab8b835f12338520698bd7
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
