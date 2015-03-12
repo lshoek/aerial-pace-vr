@@ -7,7 +7,9 @@
 #include <CaveLib\texture.h>
 #include <CaveLib\model.h>
 
-App::App(void){}
+App::App(WiiMoteWrapper * w){
+	wiiMoteWrapper = w; 
+}
 App::~App(void){}
 
 void App::init(void)
@@ -25,6 +27,10 @@ void App::init(void)
 void App::preFrame(double, double totalTime)
 {
 	glm::mat4 mat = wand.getData();
+	if (wiiMoteWrapper == nullptr)
+		printf("null\n");
+	else
+		printf("%f\n", wiiMoteWrapper->degrees);
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)

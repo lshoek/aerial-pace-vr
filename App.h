@@ -5,6 +5,7 @@
 #include <VrLib\Kernel.h>
 #include <CaveLib\CaveLib.h>
 #include <GL\glew.h>
+#include "WiiMoteWrapper.h"
 
 class cTexture;
 
@@ -16,9 +17,10 @@ class App : public Application
 		DigitalDevice leftButton;
 		cTexture* brickwall_texture;
 		cModel* checkers_model;
+		WiiMoteWrapper * wiiMoteWrapper;
 
 	public:
-		App(void);
+		App(WiiMoteWrapper * w);
 		~App(void);
 		virtual void init();
 		virtual void preFrame(double, double);

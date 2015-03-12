@@ -11,9 +11,10 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	Kernel* kernel = Kernel::getInstance();  // Get the kernel
-	App* app = new App();             // Instantiate an instance of the app	
-	// Load any config files specified on the command line	
 	WiiMoteWrapper w;
+	App* app = new App(&w);             // Instantiate an instance of the app	
+	// Load any config files specified on the command line	
+	
 	thread t([&](WiiMoteWrapper * w2){ w2->start(); },&w);
 
 	for (int i = 1; i < argc; ++i)
@@ -25,8 +26,7 @@ int main(int argc, char* argv[])
 		}
 	}
 	kernel->setApp(app);
-	kernel->start();
-	
+	kernel->start();	
 	delete app;
 	w.continueGame = false;
 	t.join();

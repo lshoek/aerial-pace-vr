@@ -8,6 +8,8 @@ using namespace std;
 
 WiiMoteWrapper::WiiMoteWrapper()
 {
+	degrees = 0;
+	buttonOne = buttonTwo = buttonHome = false;
 	continueGame = true;
 }
 
@@ -154,31 +156,17 @@ reconnect:
 #ifdef USE_BEEPS_AND_DELAYS
 	Beep(1000, 300); Sleep(2000);
 #endif
-
 	COORD cursor_pos = { 0, 6 };
-	// LOOK_FOR_ADDITIONAL_WIIMOTES
-
 	// print the button event instructions:
 	BRIGHT_WHITE;
 	_tprintf(_T("\r  -- TRY: B = rumble, A = square, 1 = sine, 2 = daisy, Home = Exit --\n"));
-
-	// (stuff for animations)
-	DWORD	 last_rumble_time = timeGetTime(); // for rumble text animation
-	DWORD    last_led_time = timeGetTime(); // for led         animation
-	bool	 rumble_text = true;
-	unsigned lit_led = 0;
-
-	// display the wiimote state data until 'Home' is pressed:
-	while (!remote.Button.Home())// && !GetAsyncKeyState(VK_ESCAPE))
+	while (continueGame)
 	{
 		// IMPORTANT: the wiimote state needs to be refreshed each pass
 		while (remote.RefreshState() == NO_CHANGE)
 			Sleep(1); // // don't hog the CPU if nothing changed
-
 		cursor_pos.Y = 8;
 		SetConsoleCursorPosition(console, cursor_pos);
-
-		// did we loose the connection?
 		if (remote.ConnectionLost())
 		{
 			BRIGHT_RED; _tprintf(
@@ -285,7 +273,7 @@ reconnect:
 		//   (using an arbitrary threshold)
 		if (remote.Acceleration.Orientation.UpdateAge > 10)
 			RED;
-
+		degrees = remote.Acceleration.Orientation.Pitch;
 		_tprintf(_T("Pitch:%4ddeg  Roll:%4ddeg  \n")
 			_T("                           (X %+.3f  Y %+.3f  Z %+.3f)      \n"),
 			(int)remote.Acceleration.Orientation.Pitch,
