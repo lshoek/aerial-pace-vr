@@ -17,6 +17,7 @@ void App::init(void)
 	wand.init("WandPosition");
 	head.init("MainUserHead");
 	leftButton.init("LeftButton");
+	upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
@@ -34,26 +35,40 @@ void App::preFrame(double frameTime, double totalTime)
 	fps = int(1 / timeFctr);
 	clock_start = clock();
 
+	//camera
+	if (upArrow.getData() == ON)
+		camera->updateSpeed();
+
+	if (leftArrow.getData() == ON)
+	{
+		camera->rotateCamYaw(-1.0f);
+		//if (last_player_index <= 1)
+		//	player_index = 0;
+	}
+	else if (rightArrow.getData() == ON)
+	{
+		camera->rotateCamYaw(1.0f);
+		//if (last_player_index >= 1)
+		//	player_index = 2;
+	}
+
 	// wand
 	glm::mat4 mat = wand.getData();
+	/*
 	if (wiiMoteWrapper == nullptr)
 		printf("null\n");
 	else
-		printf("%f\n", wiiMoteWrapper->degrees);
+		printf("%f\n", wiiMoteWrapper->degrees);*/
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
-	/* TEXTURES OFF */
-	//glDisable(GL_TEXTURE_2D);
-	//glEnable(GL_COLOR_MATERIAL);
-
 	glEnable(GL_TEXTURE_2D);
-	glTranslatef(-1.0f, 0.0f, -1.0f);
-	glScalef(5.0f, 5.0f, 5.0f);
+	//glTranslatef(-1.0f, 0.0f, -1.0f);
+	//glScalef(5.0f, 5.0f, 5.0f);
 
-	std::cout << fps << "\n";
-
+	camera->refresh();
+	glScalef(100.0f, 100.0f, 100.0f);
 	checkers_model->draw();
 	DrawBrickWall();
 }
