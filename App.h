@@ -22,6 +22,9 @@ class App : public Application
 		WiiMoteWrapper * wiiMoteWrapper;
 		Camera* camera;
 		GLint fps;
+		clock_t clock_start = clock();
+
+		int updateCarSpeed(GLfloat timeFactor);
 
 	public:
 		App(WiiMoteWrapper * w);
@@ -30,7 +33,5 @@ class App : public Application
 		virtual void preFrame(double, double);
 		virtual void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
 		void DrawBrickWall();
-
-	private:
-		clock_t clock_start = clock();
+			
 };

@@ -12,6 +12,28 @@ App::App(WiiMoteWrapper * w){
 }
 App::~App(void){}
 
+int App::updateCarSpeed(GLfloat timeFactor){
+	
+	if (wiiMoteWrapper->buttonHome)//pauze, zolang home is ingedrukt
+		return 0;
+	GLfloat acceleration = 0;//extraspeed 
+	GLfloat constspeed = 10;//de snelheid is altijd 10m/s
+	GLfloat deltaspeed = constspeed * timeFactor;
+	if (wiiMoteWrapper->buttonOne)//speed goes down
+	{
+		acceleration -= deltaspeed;
+	}
+	if (wiiMoteWrapper->buttonTwo)//speed goes up
+	{
+		acceleration += deltaspeed;
+	}
+	//de auto moet versnellen met de acceleratie
+
+	//laat bullet de zwaartekracht berekenen voor een mogelijke extra snelheid
+
+	return 1;//succes!
+}
+
 void App::init(void)
 {
 	wand.init("WandPosition");
@@ -36,10 +58,7 @@ void App::preFrame(double frameTime, double totalTime)
 
 	// wand
 	glm::mat4 mat = wand.getData();
-	if (wiiMoteWrapper == nullptr)
-		printf("null\n");
-	else
-		printf("%f\n", wiiMoteWrapper->degrees);
+	updateCarSpeed(timeFctr);
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
@@ -52,7 +71,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glTranslatef(-1.0f, 0.0f, -1.0f);
 	glScalef(5.0f, 5.0f, 5.0f);
 
-	std::cout << fps << "\n";
+	//std::cout << fps << "\n";
 
 	checkers_model->draw();
 	DrawBrickWall();
