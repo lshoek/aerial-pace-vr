@@ -10,7 +10,13 @@
 App::App(WiiMoteWrapper * w){
 	wiiMoteWrapper = w; 
 }
-App::~App(void){}
+App::~App(void){
+	delete world;
+	delete solver;
+	delete collisionConfiguration;
+	delete dispatcher;
+	delete broadphase;
+}
 
 int App::updateCarSpeed(GLfloat timeFactor){
 	
@@ -42,9 +48,22 @@ void App::init(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
+
+	bullet3Init();
+
 	brickwall_texture = CaveLib::loadTexture("data/CellStroll/textures/brickwall.jpg");
 	checkers_model = CaveLib::loadModel("data/CellStroll/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
 	camera = new Camera();
+}
+
+int App::bullet3Init(){
+	broadphase = new btDbvtBroadphase();
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	solver = new btSequentialImpulseConstraintSolver();
+	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+	world->setGravity(btVector3(0, 0, 0));
+	return 1;
 }
 
 void App::preFrame(double frameTime, double totalTime)
