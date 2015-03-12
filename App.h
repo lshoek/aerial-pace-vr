@@ -36,6 +36,7 @@ class App : public Application
 		PositionalDevice wand;
 		PositionalDevice head;
 		DigitalDevice leftButton;
+		DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
 		cTexture* brickwall_texture;
 		cModel* checkers_model;
 		WiiMoteWrapper * wiiMoteWrapper;
