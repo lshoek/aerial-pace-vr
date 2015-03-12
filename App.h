@@ -26,6 +26,7 @@
 #include "WiiMoteWrapper.h"
 #include <ctime>
 #include "Camera.h"
+#include "Car.h"
 
 class cTexture;
 
@@ -54,6 +55,8 @@ class App : public Application
 		btCollisionDispatcher*                  dispatcher;
 		btSequentialImpulseConstraintSolver*    solver;
 		btDiscreteDynamicsWorld*                world;
+
+		Car car;
 
 		virtual void init();
 		virtual void preFrame(double, double);
