@@ -239,15 +239,15 @@ reconnect:
 			}
 			if (button_name == _T("One"))
 			{
-				//wiimotedata->buttonOnePressed = pressed;
+				buttonOne = pressed;
 			}
 			if (button_name == _T("Two"))
 			{
-				//wiimotedata->buttonOnePressed = pressed;
+				buttonTwo = pressed;
 			}
 			if (button_name == _T("Home"))
 			{
-				//wiimotedata->buttonOnePressed = pressed;
+				buttonHome = pressed;
 			}
 			if (pressed) {
 				BRIGHT_WHITE; _tprintf(_T("%s"), button_name);

@@ -10,7 +10,35 @@
 App::App(WiiMoteWrapper * w){
 	wiiMoteWrapper = w; 
 }
-App::~App(void){}
+App::~App(void){
+	delete world;
+	delete solver;
+	delete collisionConfiguration;
+	delete dispatcher;
+	delete broadphase;
+}
+
+int App::updateCarSpeed(GLfloat timeFactor){
+	
+	if (wiiMoteWrapper->buttonHome)//pauze, zolang home is ingedrukt
+		return 0;
+	GLfloat acceleration = 0;//extraspeed 
+	GLfloat constspeed = 10;//de snelheid is altijd 10m/s
+	GLfloat deltaspeed = constspeed * timeFactor;
+	if (wiiMoteWrapper->buttonOne)//speed goes down
+	{
+		acceleration -= deltaspeed;
+	}
+	if (wiiMoteWrapper->buttonTwo)//speed goes up
+	{
+		acceleration += deltaspeed;
+	}
+	//de auto moet versnellen met de acceleratie
+
+	//laat bullet de zwaartekracht berekenen voor een mogelijke extra snelheid
+
+	return 1;//succes!
+}
 
 void App::init(void)
 {
@@ -21,9 +49,22 @@ void App::init(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
+
+	bullet3Init();
+
 	brickwall_texture = CaveLib::loadTexture("data/CellStroll/textures/brickwall.jpg");
 	checkers_model = CaveLib::loadModel("data/CellStroll/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
 	camera = new Camera();
+}
+
+int App::bullet3Init(){
+	broadphase = new btDbvtBroadphase();
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	solver = new btSequentialImpulseConstraintSolver();
+	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+	world->setGravity(btVector3(0, 0, 0));
+	return 1;
 }
 
 void App::preFrame(double frameTime, double totalTime)
@@ -54,11 +95,6 @@ void App::preFrame(double frameTime, double totalTime)
 
 	// wand
 	glm::mat4 mat = wand.getData();
-	/*
-	if (wiiMoteWrapper == nullptr)
-		printf("null\n");
-	else
-		printf("%f\n", wiiMoteWrapper->degrees);*/
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)

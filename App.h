@@ -5,6 +5,24 @@
 #include <VrLib\Kernel.h>
 #include <CaveLib\CaveLib.h>
 #include <GL\glew.h>
+#ifdef _DEBUG
+#pragma comment(lib, "Bullet3Common_vs2010_debug.lib")
+#pragma comment(lib, "Bullet3Collision_vs2010_debug.lib")
+#pragma comment(lib, "Bullet3Dynamics_vs2010_debug.lib")
+#pragma comment(lib, "BulletCollision_vs2010_debug.lib")
+#pragma comment(lib, "BulletDynamics_vs2010_debug.lib")
+#pragma comment(lib, "Bullet3Geometry_vs2010_debug.lib")
+#pragma comment(lib, "LinearMath_vs2010_debug.lib")
+#else
+#pragma comment(lib, "Bullet3Common_vs2010.lib")
+#pragma comment(lib, "Bullet3Collision_vs2010.lib")
+#pragma comment(lib, "Bullet3Dynamics_vs2010.lib")
+#pragma comment(lib, "BulletCollision_vs2010.lib")
+#pragma comment(lib, "BulletDynamics_vs2010.lib")
+#pragma comment(lib, "Bullet3Geometry_vs2010.lib")
+#pragma comment(lib, "LinearMath_vs2010.lib")
+#endif
+#include <btBulletDynamicsCommon.h>
 #include "WiiMoteWrapper.h"
 #include <ctime>
 #include "Camera.h"
@@ -23,15 +41,24 @@ class App : public Application
 		WiiMoteWrapper * wiiMoteWrapper;
 		Camera* camera;
 		GLint fps;
+		clock_t clock_start = clock();
+
+		int updateCarSpeed(GLfloat timeFactor);
+		int bullet3Init();
 
 	public:
 		App(WiiMoteWrapper * w);
 		~App(void);
+
+		btBroadphaseInterface*                  broadphase;
+		btDefaultCollisionConfiguration*        collisionConfiguration;
+		btCollisionDispatcher*                  dispatcher;
+		btSequentialImpulseConstraintSolver*    solver;
+		btDiscreteDynamicsWorld*                world;
+
 		virtual void init();
 		virtual void preFrame(double, double);
 		virtual void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
 		void DrawBrickWall();
-
-	private:
-		clock_t clock_start = clock();
+			
 };
