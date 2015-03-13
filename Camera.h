@@ -34,10 +34,10 @@ class Camera
 	private:
 		bool isMoving = false;
 		GLfloat speed = 0;
-		GLfloat prevSpeed;
+		GLfloat prevSpeed = 0;
 		const GLfloat MAX_SPEED = 50.0;						// DEFAULT 50.0
 		const GLfloat MAX_ROTATION_SPEED = 2.5;				// DEFAULT 2.5
-		const GLfloat ACCELERATION_SPEED = 0.2;				// DEFAULT 1.0
+		const GLfloat ACCELERATION_SPEED = 0.4;				// DEFAULT 0.1
 		const GLfloat DECELERATION_SPEED = 0.990;			// DEFAULT 0.99
 		const GLfloat ROTATION_ACCELERATION_SPEED = 0.2;	// DEFAULT 0.04
 
