@@ -28,14 +28,18 @@ int App::updateCarSpeed(GLfloat timeFactor){
 	{
 		newSpeed = car.MAXFORCE * timeFactor;
 	}
-	car.steeringWheelDegrees = wiiMoteWrapper->degrees;
-	car.carSpeed += newSpeed+1;
-	car.carSpeed *= 0.91f;
 	car.carDegrees = (car.carDegrees + car.steeringWheelDegrees);
-	float carRadians = (car.carDegrees)*3.14 / 180;
-	btVector3 physicsSpeed(car.carSpeed * cos(carRadians) - 0 * sin(carRadians),
-		car.carSpeed * sin(carRadians) - 0 * cos(carRadians),
-		0);
+	
+	btVector3 physicsSpeed(car.carSpeed, 0, 0);//moet nog gedraaid worden met car.carDegrees
+	btVector3 deltaSpeed(newSpeed, 0, 0);//moet nog gedraaid worden met wiiMoteWrapper->degrees;
+	physicsSpeed += deltaSpeed;
+	physicsSpeed *= 0.91f;
+	car.carDegrees = physicsSpeed.angle(btVector3(0, 0, 0));
+	car.carSpeed = physicsSpeed.length();
+	//float carRadians = (car.carDegrees)*3.14 / 180;
+	//btVector3 physicsSpeed(car.carSpeed * cos(carRadians) - 0 * sin(carRadians),
+	//	car.carSpeed * sin(carRadians) - 0 * cos(carRadians),
+	//	0);
 	physics.realCar->setGravity(physicsSpeed);
 	physics.world->stepSimulation(timeFactor);//en updaten
 	//debug
