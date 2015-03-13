@@ -113,7 +113,7 @@ void Camera::rotateCamYaw(GLfloat angle)
 {
 	if (angle > 0 && rightRotationSpeed < MAX_ROTATION_SPEED)
 		rightRotationSpeed += ROTATION_ACCELERATION_SPEED;
-	if (angle < 0 && rightRotationSpeed < MAX_ROTATION_SPEED)
+	if (angle < 0 && leftRotationSpeed < MAX_ROTATION_SPEED)
 		leftRotationSpeed += ROTATION_ACCELERATION_SPEED;
 }
 

@@ -69,20 +69,13 @@ void App::preFrame(double frameTime, double totalTime)
 	//camera
 	/*if (upArrow.getData() == ON)
 		camera->updateSpeed();
-
 	if (leftArrow.getData() == ON)
-	{
 		camera->rotateCamYaw(-1.0f);
-		//if (last_player_index <= 1)
-		//	player_index = 0;
-	}
 	else if (rightArrow.getData() == ON)
-	{
 		camera->rotateCamYaw(1.0f);
 		//if (last_player_index >= 1)
 		//	player_index = 2;
 	}*/
-
 	// wand
 	//glm::mat4 mat = wand.getData();
 }
@@ -97,53 +90,28 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	//camera->refresh();
 	glScalef(100.0f, 100.0f, 100.0f);
+
 	checkers_model->draw();
-	DrawBrickWall();
 	//voorbeeld: auto a =physics.world->getCollisionObjectArray()[0];
 	printf("");
 }
 
-void App::DrawBrickWall(void)
+void App::DrawWireFrame(void)
 {
-	glBindTexture(GL_TEXTURE_2D, brickwall_texture->tid());
 	glPushMatrix();
-	glBegin(GL_QUADS);
-
-	// Top 
-	glTexCoord3f(1.0f, 0.0f, 0.0f); glVertex3f(1.0f, 1.0f, -1.0f);
-	glTexCoord3f(1.0f, 1.0f, 0.0f); glVertex3f(-1.0f, 1.0f, -1.0f);
-	glTexCoord3f(0.0f, 1.0f, 1.0f); glVertex3f(-1.0f, 1.0f, 1.0f);
-	glTexCoord3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, 1.0f, 1.0f);
-
-	// Bottom 
-	glTexCoord3f(1.0f, 0.0f, 0.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-	glTexCoord3f(1.0f, 1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-	glTexCoord3f(0.0f, 1.0f, 1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-	glTexCoord3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, -1.0f);
-
-	// Front 
-	glTexCoord3f(1.0f, 0.0f, 0.0f); glVertex3f(1.0f, 1.0f, 1.0f);
-	glTexCoord3f(1.0f, 1.0f, 0.0f); glVertex3f(-1.0f, 1.0f, 1.0f);
-	glTexCoord3f(0.0f, 1.0f, 1.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-	glTexCoord3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-
-	// Back face
-	glTexCoord3f(1.0f, 0.0f, 0.0f); glVertex3f(1.0f, -1.0f, -1.0f);
-	glTexCoord3f(1.0f, 1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-	glTexCoord3f(0.0f, 1.0f, 1.0f); glVertex3f(-1.0f, 1.0f, -1.0f);
-	glTexCoord3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, 1.0f, -1.0f);
-
-	// Left face 
-	glTexCoord3f(1.0f, 0.0f, 0.0f); glVertex3f(-1.0f, 1.0f, 1.0f);
-	glTexCoord3f(1.0f, 1.0f, 0.0f); glVertex3f(-1.0f, 1.0f, -1.0f);
-	glTexCoord3f(0.0f, 1.0f, 1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-	glTexCoord3f(0.0f, 0.0f, 1.0f); glVertex3f(-1.0f, -1.0f, 1.0f);
-
-	// Right face
-	glTexCoord3f(1.0f, 0.0f, 0.0f); glVertex3f(1.0f, 1.0f, -1.0f);
-	glTexCoord3f(1.0f, 1.0f, 0.0f); glVertex3f(1.0f, 1.0f, 1.0f);
-	glTexCoord3f(0.0f, 1.0f, 1.0f); glVertex3f(1.0f, -1.0f, 1.0f);
-	glTexCoord3f(0.0f, 0.0f, 1.0f); glVertex3f(1.0f, -1.0f, -1.0f);
-	glEnd();
+	glLineWidth(1.0);
+	glColor3f(1.0, 0.0, 0.0);
+	glTranslatef(0.0f, -0.05f, 0.0f);
+	for (float i = -2.0f; i <= 2.0f; i+=0.1f)
+	{
+		glBegin(GL_LINES);
+		glVertex3f(i, 0.0f, -2.0f);
+		glVertex3f(i, 0.0f, 2.0f);
+		glEnd();
+		glBegin(GL_LINES);
+		glVertex3f(-2.0f, 0.0f, i);
+		glVertex3f(2.0f, 0.0f, i);
+		glEnd();
+	}
 	glPopMatrix();
 }

@@ -42,6 +42,5 @@ class App : public Application
 		virtual void init();
 		virtual void preFrame(double, double);
 		virtual void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
-		void DrawBrickWall();
-			
+		void DrawWireFrame(void);
 };
