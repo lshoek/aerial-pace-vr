@@ -96,6 +96,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Car.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="WiiLib.cpp" />
     <ClCompile Include="wiimote.cpp" />
@@ -105,6 +106,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Car.h" />
+    <ClInclude Include="Physics.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="WiiLib.h" />
     <ClInclude Include="wiimote.h" />

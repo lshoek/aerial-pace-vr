@@ -9,6 +9,7 @@
     <ClCompile Include="WiiMoteWrapper.cpp" />
     <ClCompile Include="WiiLib.cpp" />
     <ClCompile Include="wiimote.cpp" />
+    <ClCompile Include="Physics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -20,6 +21,7 @@
     <ClInclude Include="wiimote.h" />
     <ClInclude Include="wiimote_common.h" />
     <ClInclude Include="wiimote_state.h" />
+    <ClInclude Include="Physics.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="simple.frag" />
