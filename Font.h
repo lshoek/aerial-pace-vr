@@ -19,7 +19,7 @@ class Font
 		void drawText(string, const GLfloat, const GLfloat, const GLfloat);
 
 	private:
-		GLint charList;
+		GLuint charList;
 		cTexture* fontTexture;
 		map<char, Glyph> charmap;
 		typedef map<char, Glyph>::iterator cgmap;

@@ -15,9 +15,9 @@ void App::init(void)
 {
 	upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
 	physics.bullet3Init();
+	classicFont = new Font("data/aerial-pace-vr/fonts/classicfnt32.fnt", "data/aerial-pace-vr/fonts/classicfnt32.png");
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
 	camera = new Camera();
-	classicFont = new Font("data/aerial-pace-vr/fonts/classicfnt32.fnt", "data/aerial-pace-vr/fonts/classicfnt32.png");
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 }
@@ -52,7 +52,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	checkers_model->draw();
 	//voorbeeld: auto a =physics.world->getCollisionObjectArray()[0];
 	DrawWireFrame();
-	classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
+	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
 }
 
 void App::DrawWireFrame(void)

@@ -94,13 +94,13 @@ void Font::drawText(const string text, const GLfloat x, const GLfloat y, const G
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glDisable(GL_DEPTH_TEST);
-	glOrtho(0, 1280, 0, 720, -1, 1);
+	glOrtho(0, 1280, 0, 720, -1, 100);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	glTranslatef(x, y, 0);
 	glScalef(scale, scale, 1);
-	glColor4f(0, 0, 0, 1);
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	glListBase(charList);
 
 	glPushMatrix();
