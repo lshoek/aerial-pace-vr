@@ -95,6 +95,8 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Car.cpp" />
+    <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Glyph.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -106,6 +108,8 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Car.h" />
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="Glyph.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="WiiLib.h" />

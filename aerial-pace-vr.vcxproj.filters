@@ -10,6 +10,8 @@
     <ClCompile Include="WiiLib.cpp" />
     <ClCompile Include="wiimote.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Glyph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -22,6 +24,8 @@
     <ClInclude Include="wiimote_common.h" />
     <ClInclude Include="wiimote_state.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="Glyph.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="simple.frag" />

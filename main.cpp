@@ -6,8 +6,6 @@
 
 using namespace std;
 
-
-
 int main(int argc, char* argv[])
 {
 	Kernel* kernel = Kernel::getInstance();  // Get the kernel
@@ -28,6 +26,7 @@ int main(int argc, char* argv[])
 	kernel->setApp(app);
 	kernel->start();	
 	delete app;
+	//stop wii library
 	w.continueGame = false;
 	t.join();
 	return 0;

@@ -41,10 +41,15 @@ void Camera::refresh()
 	gluLookAt(m_x, m_y, m_z, m_x + m_lx, m_y + m_ly, m_z + m_lz, 0.0, 1.0, 0.0);
 
 	//rotation dec
-	if (rightRotationSpeed > ROTATION_ACCELERATION_SPEED - 0.001) rightRotationSpeed *= DECELERATION_SPEED;
-	else rightRotationSpeed = 0;
-	if (leftRotationSpeed > ROTATION_ACCELERATION_SPEED - 0.001) leftRotationSpeed *= DECELERATION_SPEED;
-	else leftRotationSpeed = 0;
+	if (rightRotationSpeed > ROTATION_ACCELERATION_SPEED - 0.001) 
+		rightRotationSpeed *= DECELERATION_SPEED;
+	else 
+		rightRotationSpeed = 0;
+
+	if (leftRotationSpeed > ROTATION_ACCELERATION_SPEED - 0.001) 
+		leftRotationSpeed *= DECELERATION_SPEED;
+	else 
+		leftRotationSpeed = 0;
 
 	//rotation acc
 	if (rightRotationSpeed > leftRotationSpeed)
@@ -101,7 +106,7 @@ void Camera::updateSpeed()
 {
 	isMoving = true;
 	if (speed < MAX_SPEED)
-		speed += ACCELERATION_SPEED*(1 - speed / MAX_SPEED);
+		speed += ACCELERATION_SPEED * (1.0f - speed / MAX_SPEED);
 }
 
 void Camera::fly(GLfloat incr)
