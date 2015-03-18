@@ -88,7 +88,7 @@ void on_state_change(wiimote			  &remote,
 	else if (changed & EXTENSION_CONNECTED)
 	{
 #ifdef USE_BEEPS_AND_DELAYS
-		Beep(1000, 200);
+		//Beep(1000, 200);
 #endif
 		remote.SetReportType(wiimote::IN_BUTTONS_ACCEL_IR_EXT);
 	}
@@ -96,7 +96,7 @@ void on_state_change(wiimote			  &remote,
 	else if (changed & EXTENSION_DISCONNECTED)
 	{
 #ifdef USE_BEEPS_AND_DELAYS
-		Beep(200, 300);
+		//Beep(200, 300);
 #endif
 	}
 }
@@ -121,7 +121,7 @@ int WiiMoteWrapper::wiiMoteMainStart()
 {
 	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 	// write the title
-	PrintTitle(console);
+	//PrintTitle(console);
 	// create a wiimote object
 	wiimote remote;
 
@@ -134,53 +134,56 @@ int WiiMoteWrapper::wiiMoteMainStart()
 	remote.CallbackTriggerFlags = (state_change_flags)(CONNECTED | EXTENSION_CHANGED | MOTIONPLUS_CHANGED);
 reconnect:
 	COORD pos = { 0, 6 };
-	SetConsoleCursorPosition(console, pos);
+	//SetConsoleCursorPosition(console, pos);
 
 	// try to connect the first available wiimote in the system
 	//  (available means 'installed, and currently Bluetooth-connected'):
-	RED; _tprintf(_T("Looking for a Wiimote\n")); WHITE;
+	//RED; _tprintf(_T("Looking for a Wiimote\n")); WHITE;
 
-	static const TCHAR* wait_str[] = { _T(".  "), _T(".. "), _T("...") };
+	//static const TCHAR* wait_str[] = { _T(".  "), _T(".. "), _T("...") };
 	unsigned count = 0;
-	while (!remote.Connect(wiimote::FIRST_AVAILABLE)) {
-		_tprintf(_T("\b\b\b\b%s "), wait_str[count % 3]);
+	while (!remote.Connect(wiimote::FIRST_AVAILABLE) && continueGame) {
+		//_tprintf(_T("\b\b\b\b%s "), wait_str[count % 3]);
 		count++;
 #ifdef USE_BEEPS_AND_DELAYS
-		Beep(500, 30); Sleep(1000);
+		//Beep(500, 30); 
+		Sleep(1000);
 #endif
+	}
+	if (!continueGame){
+		return 0;
 	}
 
 	// connected - light all LEDs
 	remote.SetLEDs(0x0f);
-	BRIGHT_CYAN; _tprintf(_T("\b\b\b\b... connected!"));
+	BRIGHT_CYAN; _tprintf(_T("\b\b\b\b... connected!")); WHITE;
 #ifdef USE_BEEPS_AND_DELAYS
-	Beep(1000, 300); Sleep(2000);
+	//Beep(1000, 300); 
+	Sleep(2000);
 #endif
 	COORD cursor_pos = { 0, 6 };
 	// print the button event instructions:
-	BRIGHT_WHITE;
-	_tprintf(_T("\r  -- TRY: B = rumble, A = square, 1 = sine, 2 = daisy, Home = Exit --\n"));
+	//BRIGHT_WHITE;	_tprintf(_T("\r  -- TRY: B = rumble, A = square, 1 = sine, 2 = daisy, Home = Exit --\n"));
 	while (continueGame)
 	{
 		// IMPORTANT: the wiimote state needs to be refreshed each pass
 		while (remote.RefreshState() == NO_CHANGE)
 			Sleep(1); // // don't hog the CPU if nothing changed
 		cursor_pos.Y = 8;
-		SetConsoleCursorPosition(console, cursor_pos);
+		//SetConsoleCursorPosition(console, cursor_pos);
 		if (remote.ConnectionLost())
 		{
-			BRIGHT_RED; _tprintf(
-				_T("   *** connection lost! ***                                          \n\n\n\n\n\n\n\n\n\n\n"));
-			Beep(100, 1000);
+			//BRIGHT_RED; _tprintf(			_T("   *** connection lost! ***                                          \n\n\n\n\n\n\n\n\n\n\n"));
+			//Beep(100, 1000);
 			Sleep(2000);
 			COORD pos = { 0, 6 };
-			SetConsoleCursorPosition(console, pos);
-			printf("\n\n\n");
+			//SetConsoleCursorPosition(console, pos);
+			//printf("\n\n\n");
 			goto reconnect;
 		}
 
 		// rumble if 'B' (trigger) is pressed
-		remote.SetRumble(remote.Button.B());
+		//remote.SetRumble(remote.Button.B());
 
 		// TEMP: Minus button disables MotionPlus (if connected) to allow its
 		//        own extension port to work
@@ -205,26 +208,21 @@ reconnect:
 			last_##button = pressed; }
 
 		//  play audio whilst certain buttons are held
-		ON_PRESS_RELEASE(A, remote.PlaySquareWave(FREQ_3130HZ, 0x20),
-			remote.EnableSpeaker(false));
+		//ON_PRESS_RELEASE(A, remote.PlaySquareWave(FREQ_3130HZ, 0x20),remote.EnableSpeaker(false));
 		// Battery level:
-		CYAN; _tprintf(_T("  Battery: "));
+		/*CYAN; _tprintf(_T("  Battery: "));
 		(remote.bBatteryDrained) ? BRIGHT_RED :
 			(remote.BatteryPercent >= 30) ? BRIGHT_GREEN : BRIGHT_YELLOW;
-		_tprintf(_T("%3u%%   "), remote.BatteryPercent);
+		_tprintf(_T("%3u%%   "), remote.BatteryPercent);*/
 		// Rumble
-		WHITE; _tprintf(_T("] "));
-		if (remote.bRumble) {
-			BRIGHT_WHITE; printf("RUMBLE ");
-		}
-		else
-			_tprintf(_T("       "));
+		//WHITE; _tprintf(_T("] "));
+		//if (remote.bRumble) {BRIGHT_WHITE; printf("RUMBLE ");}	else_tprintf(_T("       "));
 		// Output method:
-		CYAN; _tprintf(_T("        using %s\n"), (remote.IsUsingHIDwrites() ?
-			_T("HID writes") : _T("WriteFile()")));
+		//CYAN; _tprintf(_T("        using %s\n"), (remote.IsUsingHIDwrites() ?
+//			_T("HID writes") : _T("WriteFile()")));
 
 		// Buttons:
-		CYAN; _tprintf(_T("  Buttons: ")); WHITE; _tprintf(_T("["));
+		//CYAN; _tprintf(_T("  Buttons: ")); WHITE; _tprintf(_T("["));
 		for (unsigned bit = 0; bit < 16; bit++)
 		{
 			WORD mask = (WORD)(1 << bit);
@@ -234,9 +232,7 @@ reconnect:
 
 			const TCHAR* button_name = wiimote::ButtonNameFromBit[bit];
 			bool		 pressed = ((remote.Button.Bits & mask) != 0);
-			if (bit > 0) {
-				CYAN; _tprintf(_T("|")); // seperator
-			}
+			//if (bit > 0) {	CYAN; _tprintf(_T("|")); // seperator	}
 			if (button_name == _T("One"))
 			{
 				buttonOne = pressed;
@@ -249,40 +245,36 @@ reconnect:
 			{
 				buttonHome = pressed;
 			}
-			if (pressed) {
-				BRIGHT_WHITE; _tprintf(_T("%s"), button_name);
-			}
-			else{
-				WHITE; _tprintf(_T("%*s"), _tcslen(button_name), _T(""));
-			}
+			//if (pressed) {
+			//	BRIGHT_WHITE; _tprintf(_T("%s"), button_name);
+			//}
+			//else{
+			//	WHITE; _tprintf(_T("%*s"), _tcslen(button_name), _T(""));
+			//}
 		}
-		WHITE; _tprintf(_T("]\n"));
+		//WHITE; _tprintf(_T("]\n"));
 
 		// Acceleration:
-		CYAN; _tprintf(_T("    Accel:")); WHITE;
-		_tprintf(_T("  X %+2.3f  Y %+2.3f  Z %+2.3f  \n"),
-			remote.Acceleration.X,
-			remote.Acceleration.Y,
-			remote.Acceleration.Z);
+		//CYAN; _tprintf(_T("    Accel:")); WHITE;
+		//_tprintf(_T("  X %+2.3f  Y %+2.3f  Z %+2.3f  \n"),remote.Acceleration.X,remote.Acceleration.Y,remote.Acceleration.Z);
 
 		// Orientation estimate (shown red if last valid update is aging):
-		CYAN; _tprintf(_T("   Orient:")); WHITE;
-		_tprintf(_T("  UpdateAge %3u  "), remote.Acceleration.Orientation.UpdateAge);
+		//CYAN; _tprintf(_T("   Orient:")); WHITE;		_tprintf(_T("  UpdateAge %3u  "), remote.Acceleration.Orientation.UpdateAge);
 
 		//  show if the last orientation update is considered out-of-date
 		//   (using an arbitrary threshold)
-		if (remote.Acceleration.Orientation.UpdateAge > 10)
-			RED;
+		//if (remote.Acceleration.Orientation.UpdateAge > 10)
+		//	RED;
 		degrees = remote.Acceleration.Orientation.Pitch;
-		_tprintf(_T("Pitch:%4ddeg  Roll:%4ddeg  \n")
+		/*_tprintf(_T("Pitch:%4ddeg  Roll:%4ddeg  \n")
 			_T("                           (X %+.3f  Y %+.3f  Z %+.3f)      \n"),
 			(int)remote.Acceleration.Orientation.Pitch,
 			(int)remote.Acceleration.Orientation.Roll,
 			remote.Acceleration.Orientation.X,
 			remote.Acceleration.Orientation.Y,
-			remote.Acceleration.Orientation.Z);
+			remote.Acceleration.Orientation.Z);*/
 		// Speaker:
-		CYAN; _tprintf(_T("  Speaker:"));
+		/*CYAN; _tprintf(_T("  Speaker:"));
 		WHITE;
 		_tprintf(_T("  %s | %s    "), (remote.Speaker.bEnabled ? _T("On ") :
 			_T("Off")),
@@ -290,7 +282,7 @@ reconnect:
 			_T("     ")));
 		_tprintf(_T("Frequency %4u Hz   Volume 0x%02x\n"),
 			wiimote::FreqLookup[remote.Speaker.Freq],
-			remote.Speaker.Volume);
+			remote.Speaker.Volume);*/
 	}
 	// disconnect (auto-happens on wiimote destruction anyway, but let's play nice)
 	remote.Disconnect();

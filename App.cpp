@@ -1,4 +1,5 @@
 #pragma comment(lib,"opengl32")
+#define _USE_MATH_DEFINES
 #include <GL\glew.h>
 #include <Windows.h>
 #include "App.h"
@@ -22,28 +23,31 @@ int App::updateCarSpeed(GLfloat timeFactor){
 	float newSpeed = 0;
 	if (wiiMoteWrapper->buttonOne)//speed goes down
 	{
-		newSpeed = car.MAXFORCE * timeFactor;
+		newSpeed -= car.MAXFORCE * timeFactor;
 	}
 	if (wiiMoteWrapper->buttonTwo)//speed goes up
 	{
-		newSpeed = car.MAXFORCE * timeFactor;
+		newSpeed += car.MAXFORCE * timeFactor;
 	}
-	car.carDegrees = (car.carDegrees + car.steeringWheelDegrees);
-	
-	btVector3 physicsSpeed(car.carSpeed, 0, 0);//moet nog gedraaid worden met car.carDegrees
-	btVector3 deltaSpeed(newSpeed, 0, 0);//moet nog gedraaid worden met wiiMoteWrapper->degrees;
+	btVector3 physicsSpeed(car.carSpeed, 0, 0);
+	//gewoon rechtdoor gaan
+	//wiiMoteWrapper->degrees = 5;
+	btVector3 deltaSpeed(newSpeed, 0, 0);
 	physicsSpeed += deltaSpeed;
-	physicsSpeed *= 0.91f;
-	car.carDegrees = physicsSpeed.angle(btVector3(0, 0, 0));
-	car.carSpeed = physicsSpeed.length();
-	//float carRadians = (car.carDegrees)*3.14 / 180;
-	//btVector3 physicsSpeed(car.carSpeed * cos(carRadians) - 0 * sin(carRadians),
-	//	car.carSpeed * sin(carRadians) - 0 * cos(carRadians),
-	//	0);
+	//physicsSpeed *= 0.9f;//zoiets
+	//float r = fmod(btRadians(wiiMoteWrapper->degrees) + car.carRadians,2*M_PI);
+	float r = (btRadians(wiiMoteWrapper->degrees) + car.carRadians);
+	physicsSpeed = physicsSpeed.rotate(btVector3(0, 1, 0), r);
+	car.carSpeed += newSpeed;
+	car.carRadians = r;
+	car.direction = physicsSpeed;
+	physicsSpeed.setY(-9.8f);
 	physics.realCar->setGravity(physicsSpeed);
 	physics.world->stepSimulation(timeFactor);//en updaten
 	//debug
-	auto a = physics.realCar->getWorldTransform();
+	btTransform a = physics.realCar->getWorldTransform();
+	btVector3 transform = a.getOrigin();
+	float length = transform.length();
 	return 1;//succes!
 }
 
@@ -93,10 +97,27 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	//glScalef(5.0f, 5.0f, 5.0f);
 
 	//camera->refresh();
+	glPushMatrix();
 	glScalef(100.0f, 100.0f, 100.0f);
-
-	checkers_model->draw();
+	DrawWireFrame();
+	glPopMatrix();
+	//checkers_model->draw();
 	//voorbeeld: auto a =physics.world->getCollisionObjectArray()[0];
+	
+	
+	glPushMatrix();
+	btTransform a = physics.realCar->getWorldTransform();
+	//glm::mat4 
+	btTransform btf = physics.realCar->getCenterOfMassTransform();
+	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
+	printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), car.carRadians, car.carSpeed);
+	glTranslatef(b.x(), b.y(), b.z());
+	glRotatef(car.carRadians, 0, 1, 0);
+	//glScalef(0.3, 0.3, 0.3);
+	//gltrans
+	checkers_model->draw();
+	glPopMatrix();
+	//setworldtransform
 	printf("");
 }
 

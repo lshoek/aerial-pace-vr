@@ -3,8 +3,8 @@
 Car::Car()
 {
 	carSpeed = steeringWheelDegrees = 0;
-	carDegrees = 0;
-	MAXFORCE = 10;
+	carRadians = 0;
+	MAXFORCE = 30.0f;
 
 	
 }

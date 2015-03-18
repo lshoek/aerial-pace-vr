@@ -17,6 +17,10 @@
 #pragma comment(lib, "LinearMath_vs2010.lib")
 #endif
 #include <btBulletDynamicsCommon.h>
+#include <vector>
+
+using namespace std;
+
 class Physics
 {
 public:
@@ -31,6 +35,8 @@ public:
 
 	int Physics::bullet3Init();
 	void addCar();
+	void addFloor(float x1, float x2, float x3);
 	btRigidBody * realCar;
+	vector<btRigidBody *> floorParts;
 };
 

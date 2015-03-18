@@ -1,5 +1,7 @@
 
 #pragma once
+
+#include <btBulletDynamicsCommon.h>
 class Car
 {
 public:
@@ -10,10 +12,11 @@ public:
 	//graden van wielen
 	float steeringWheelDegrees;
 	//graden van auto
-	float carDegrees;
+	float carRadians;
 	//snelheids van auto
 	float carSpeed;
 	//maximale snelheid
 	float MAXFORCE;
+	btVector3 direction;
 };
 
