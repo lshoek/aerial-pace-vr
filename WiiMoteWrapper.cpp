@@ -11,6 +11,7 @@ WiiMoteWrapper::WiiMoteWrapper()
 	degrees = 0;
 	buttonOne = buttonTwo = buttonHome = false;
 	continueGame = true;
+	status = 0; //0 = wachten 1 = succes -1 = niet succes
 }
 
 void WiiMoteWrapper::start(){
@@ -157,6 +158,7 @@ reconnect:
 	// connected - light all LEDs
 	remote.SetLEDs(0x0f);
 	BRIGHT_CYAN; _tprintf(_T("\b\b\b\b... connected!")); WHITE;
+	status = 1;
 #ifdef USE_BEEPS_AND_DELAYS
 	//Beep(1000, 300); 
 	Sleep(2000);

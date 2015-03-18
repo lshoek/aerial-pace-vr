@@ -41,6 +41,7 @@ class App : public Application
 		Car car;
 
 		void init();
+		void testUpdate(GLfloat timeFactor);
 		int updateCarSpeed(GLfloat timeFactor);
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);

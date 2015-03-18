@@ -13,7 +13,7 @@ public:
 	float steeringWheelDegrees;
 	//graden van auto
 	float carRadians;
-	//snelheids van auto
+	//snelheid van auto
 	float carSpeed;
 	//maximale snelheid
 	float MAXFORCE;

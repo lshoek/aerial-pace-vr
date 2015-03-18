@@ -10,6 +10,7 @@ public:
 	bool buttonOne;
 	bool buttonTwo;
 	bool buttonHome;
+	int status;
 
 	WiiMoteWrapper();
 	~WiiMoteWrapper();

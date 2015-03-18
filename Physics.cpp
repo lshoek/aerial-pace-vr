@@ -22,13 +22,13 @@ int Physics::bullet3Init(){
 	solver = new btSequentialImpulseConstraintSolver();
 	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 	world->setGravity(btVector3(0, 0, 0));
-	addFloor(-1.0,-1.0,-1.0);
+	//addFloor(-1.0,-1.0,-1.0);
 	addCar();
 	return 1;
 }
 
 void Physics::addFloor(float x1, float x2, float x3){
-	btBoxShape* pBoxShape = new btBoxShape(btVector3(3.0f, 0, 3.0f));
+	btBoxShape* pBoxShape = new btBoxShape(btVector3(3.0f, 0.05f, 3.0f));
 	// give our box an initial position of (0,0,0)
 	btTransform transform;
 	transform.setIdentity();
