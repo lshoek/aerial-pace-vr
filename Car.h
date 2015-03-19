@@ -26,4 +26,3 @@ public:
 	WiiMoteWrapper * wiiMoteWrapper;
 	Physics * physics;
 };
-

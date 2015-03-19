@@ -5,45 +5,12 @@
 #include <CaveLib\model.h>
 #include "App.h"
 
-App::App(WiiMoteWrapper * w){
+App::App(WiiMoteWrapper* w)
+{
 	wiiMoteWrapper = w; 
 	car.initCar(w, &physics);
 }
 App::~App(void){}
-
-/*nog niet weghalen
-=======
->>>>>>> 19d8423518e9017ce5359d44b96381e421faf365
-int App::updateCarSpeed(GLfloat timeFactor){
-	
-	if (!wiiMoteWrapper || !physics.world)
-		return -2;
-	if (wiiMoteWrapper->buttonHome)//pauze, zolang home is ingedrukt
-		return -1;
-	float newSpeed = 0;
-	if (wiiMoteWrapper->buttonOne)//speed goes down
-		newSpeed -= car.MAXFORCE * timeFactor;
-	if (wiiMoteWrapper->buttonTwo)//speed goes up
-		newSpeed += car.MAXFORCE * timeFactor;
-	newSpeed += car.MAXFORCE;
-	btVector3 deltaSpeed = btVector3(newSpeed, 0, 0);// .rotate(btVector3(0, 1, 0), btRadians(wiiMoteWrapper->degrees));
-	float r = (btRadians(wiiMoteWrapper->degrees) + car.carRadians);
-	car.carSpeed += newSpeed;
-	car.carRadians = r;
-	btQuaternion rotation = physics.realCar->getOrientation();
-	float rotationAngle = rotation.getAngle() + btRadians(30.0f);//wiiMoteWrapper->degrees
-	btQuaternion newRotation = btQuaternion(btVector3(0,1.0f,0), rotationAngle);
-	//newRotation *= rotation;
-	physics.realCar->getWorldTransform().setRotation(newRotation);
-	car.carRadians = newRotation.getAngle();
-	//physics.realCar->applyCentralForce(deltaSpeed);
-	physics.realCar->applyTorque(deltaSpeed);
-	physics.realCar->activate();
-	physics.world->stepSimulation(timeFactor);//en updaten	
-	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), physics.realCar->getOrientation().getAngle(), car.carSpeed);
-	return 1;//succes!
-}*/
 
 void App::init(void)
 {
@@ -65,8 +32,8 @@ void App::preFrame(double frameTime, double totalTime)
 	camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
-	//updateCarSpeed(timeFctr);
-	//testUpdate(timeFctr);
+
+	//car
 	car.updateCar(timeFctr);
 
 	//camera
@@ -89,12 +56,11 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
 	b = car.direction;
 	glTranslatef(b.x(), 0, b.z());
-	//glTranslatef()
 	checkers_model->bbox.bounds;
 	float angle = physics.realCar->getOrientation().getAngle();
 	glRotatef(car.carRadians, 0, 1, 0);
 	checkers_model->draw();
-	//setworldtransform
+
 	for each (btRigidBody* floor in physics.floorParts)
 	{
 		btVector3 b = floor->getWorldTransform().getOrigin();
@@ -109,7 +75,8 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 		glEnd();
 		glPopMatrix();
 	}
+
+	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
 	glScalef(100.0f, 100.0f, 100.0f);
 	DrawWireFrame();
-	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
 }
