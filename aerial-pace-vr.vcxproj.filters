@@ -6,29 +6,51 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Car.cpp" />
-    <ClCompile Include="WiiMoteWrapper.cpp" />
-    <ClCompile Include="WiiLib.cpp" />
-    <ClCompile Include="wiimote.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Glyph.cpp" />
+    <ClCompile Include="WiiYourself\WiiLib.cpp">
+      <Filter>WiiYourself</Filter>
+    </ClCompile>
+    <ClCompile Include="WiiYourself\wiimote.cpp">
+      <Filter>WiiYourself</Filter>
+    </ClCompile>
+    <ClCompile Include="WiiYourself\WiiMoteWrapper.cpp">
+      <Filter>WiiYourself</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="WiiMoteWrapper.h" />
     <ClInclude Include="Car.h" />
-    <ClInclude Include="WiiLib.h" />
-    <ClInclude Include="wiimote.h" />
-    <ClInclude Include="wiimote_common.h" />
-    <ClInclude Include="wiimote_state.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="Glyph.h" />
+    <ClInclude Include="WiiYourself\WiiMoteWrapper.h">
+      <Filter>WiiYourself</Filter>
+    </ClInclude>
+    <ClInclude Include="WiiYourself\WiiLib.h">
+      <Filter>WiiYourself</Filter>
+    </ClInclude>
+    <ClInclude Include="WiiYourself\wiimote.h">
+      <Filter>WiiYourself</Filter>
+    </ClInclude>
+    <ClInclude Include="WiiYourself\wiimote_common.h">
+      <Filter>WiiYourself</Filter>
+    </ClInclude>
+    <ClInclude Include="WiiYourself\wiimote_state.h">
+      <Filter>WiiYourself</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugFunctions.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="simple.frag" />
     <None Include="simple.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="WiiYourself">
+      <UniqueIdentifier>{655c9266-a2a6-4326-93b9-2b0c59eb8bdb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

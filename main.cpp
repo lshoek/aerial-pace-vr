@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include "App.h"
 #include <VrLib/Kernel.h>
-#include "WiiMoteWrapper.h"
+#include "WiiYourself/WiiMoteWrapper.h"
 #include <thread>
 
 using namespace std;

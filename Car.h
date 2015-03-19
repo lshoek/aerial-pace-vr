@@ -1,8 +1,7 @@
-
 #pragma once
 
 #include <btBulletDynamicsCommon.h>
-#include "WiiMoteWrapper.h"
+#include "WiiYourself\WiiMoteWrapper.h"
 #include "Physics.h"
 
 class Car

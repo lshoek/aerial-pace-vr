@@ -4,7 +4,7 @@ Car::Car()
 {
 	carSpeed = steeringWheelDegrees = 0;
 	carRadians = 0;
-	MAXFORCE = 3.0f;
+	MAXFORCE = 10.0f;
 	
 	direction = btVector3(0, 0, 0);
 	
@@ -72,11 +72,10 @@ void Car::updateCar(float timeFactor){
 	speed += acceleration*timeFactor;
 	//het een en ander in car zetten
 	direction = speed;
-	speed.setY(-10.0f);
 	carSpeed = engineForce;
 	carRadians = r;
 	//bullet updaten
-	physics->realCar->applyTorque(speed);
+	physics->realCar->applyCentralForce(speed);
 	physics->realCar->activate();
 	physics->world->stepSimulation(timeFactor);//en updaten	
 	//debug

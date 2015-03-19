@@ -6,13 +6,14 @@
 #include <CaveLib\CaveLib.h>
 #include <GL\glew.h>
 
-#include "WiiMoteWrapper.h"
+#include "WiiYourself/WiiMoteWrapper.h"
 #include <ctime>
 #include "Camera.h"
 #include "Car.h"
 #include "Physics.h"
 #include "Glyph.h"
 #include "Font.h"
+#include "DebugFunctions.h"
 
 // load from json?
 #define SCREEN_WIDTH 1280
@@ -41,5 +42,4 @@ class App : public Application
 		void init();
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
-		void DrawWireFrame();
 };
