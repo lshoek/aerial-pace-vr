@@ -47,6 +47,8 @@ void Physics::addFloor(float x1, float x2, float x3){
 }
 
 void Physics::addCar(){
+	float mass = 10.0f;//kg
+	btVector3 fallInertia;
 	// create a box shape of size (1,1,1)
 	btBoxShape* pBoxShape = new btBoxShape(btVector3(1.0f, 1.0f, 1.0f));
 	// give our box an initial position of (0,0,0)
@@ -57,8 +59,12 @@ void Physics::addCar(){
 	btMotionState* m_pMotionState = new btDefaultMotionState(transform);
 	// create the rigid body construction info object, giving it a 
 	// mass of 1, the motion state, and the shape
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(1.0f, m_pMotionState, pBoxShape);
+	pBoxShape->calculateLocalInertia(mass, fallInertia);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, m_pMotionState, pBoxShape,fallInertia);
 	realCar = new btRigidBody(rbInfo);
+	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), 0);
+	realCar->getWorldTransform().setRotation(newRotation);
+	realCar->setGravity(btVector3(0, -10, 0));
 	world->addRigidBody(realCar);
 	// inform our world that we just created a new rigid body for 
 	// it to manage

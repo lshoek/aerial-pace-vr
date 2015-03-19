@@ -24,61 +24,74 @@ int App::updateCarSpeed(GLfloat timeFactor){
 		newSpeed -= car.MAXFORCE * timeFactor;
 	if (wiiMoteWrapper->buttonTwo)//speed goes up
 		newSpeed += car.MAXFORCE * timeFactor;
-	btVector3 physicsSpeed(car.carSpeed, 0, 0);
-	physicsSpeed.rotate(btVector3(0, 1, 0), car.carRadians);
-	//gewoon rechtdoor gaan
-	//wiiMoteWrapper->degrees = 5;
-	//newSpeed += car.MAXFORCE * timeFactor;
-	btVector3 deltaSpeed(newSpeed, 0, 0);
-	deltaSpeed.rotate(btVector3(0, 1, 0), btRadians(wiiMoteWrapper->degrees));
-	physicsSpeed += deltaSpeed;
-	physicsSpeed *= 0.9f;//zoiets
-	//float r = fmod(btRadians(wiiMoteWrapper->degrees) + car.carRadians,2*M_PI);
+	newSpeed += car.MAXFORCE;
+	btVector3 deltaSpeed = btVector3(newSpeed, 0, 0);// .rotate(btVector3(0, 1, 0), btRadians(wiiMoteWrapper->degrees));
 	float r = (btRadians(wiiMoteWrapper->degrees) + car.carRadians);
-	//btClamp<float>(r, -M_PI*2, M_PI*2);
-	//physicsSpeed = physicsSpeed.rotate(btVector3(0, 1, 0), r);
 	car.carSpeed += newSpeed;
-	btClamp<float>(car.carSpeed, car.MAXFORCE * 3 / 10, car.MAXFORCE);
 	car.carRadians = r;
-	car.direction = physicsSpeed;
-	
-	physicsSpeed.setY(-9.8f);
-	//physics.realCar->clearForces();
-
-	//physics.realCar->setGravity(physicsSpeed);
-	physics.world->stepSimulation(timeFactor);//en updaten
-	//debug
-	btTransform a = physics.realCar->getWorldTransform();
-	btVector3 transform = a.getOrigin();
-	float length = transform.length();
+	btQuaternion rotation = physics.realCar->getOrientation();
+	float rotationAngle = rotation.getAngle() + btRadians(/*wiiMoteWrapper->degrees*/30.0f);
+	btQuaternion newRotation = btQuaternion(btVector3(0,1.0f,0), rotationAngle);
+	//newRotation *= rotation;
+	physics.realCar->getWorldTransform().setRotation(newRotation);
+	car.carRadians = newRotation.getAngle();
+	//physics.realCar->applyCentralForce(deltaSpeed);
+	physics.realCar->applyTorque(deltaSpeed);
+	physics.realCar->activate();
+	physics.world->stepSimulation(timeFactor);//en updaten	
+	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
+	printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), physics.realCar->getOrientation().getAngle(), car.carSpeed);
 	return 1;//succes!
 }
 
-void App::testUpdate(GLfloat timeFactor){
-	//nieuw!
-	float newSpeed = 0;
-	if (wiiMoteWrapper->buttonOne)//speed goes down
-		newSpeed -= car.MAXFORCE * timeFactor;
-	if (wiiMoteWrapper->buttonTwo)//speed goes up
-		newSpeed += car.MAXFORCE * timeFactor;
-	btVector3 newForce(newSpeed, 0, 0);
-	newForce = newForce.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees));
+void App::testUpdate(GLfloat timeFactor/*dt*/){
+	//u = richting waar de auto heengaat
+	//Ftraction = u * Engineforce (nieuwe snelheid,engineforce is van knop 1 en 2)
 
-	btTransform tr = physics.realCar->getWorldTransform();
-	btQuaternion quat(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees));
-	btQuaternion oldQuat = physics.realCar->getOrientation();
-	//quat.setRotation(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees)); //or quat.setEulerZYX depending on the ordering you want
-	quat *= oldQuat;
-	tr.setRotation(quat);
-	float o1 = oldQuat.getAngle();
-	btVector3 a1 = oldQuat.getAxis();
-	float o2 = quat.getAngle();
-	btVector3 a2 = quat.getAxis();
-	physics.realCar->setFriction(0.7);	
-	physics.realCar->setWorldTransform(tr);
-	physics.realCar->applyCentralImpulse(newForce);
-	physics.realCar->activate();
-	physics.world->stepSimulation(timeFactor);
+	//Fdrag = -Cdrag * v * | v | (weerstandskracht (vector), v is de vector van de huidige snelheid)
+
+	//rolweerstand
+	//Frr = - Crr * v
+	//where Crr is a constant and v is the velocity vector.
+
+	//Ftotaal (Flong) = Ftraction + Fdrag + Frr of Ftotaal = Fbraking + Fdrag   + Frr (versnellen of remmen)
+	//Fbraking = Fbraking = -u * Cbraking (als het nodig is
+
+	//a = F / M (versnellingsvector = Ftotaal / massa
+
+	//v = v + dt*a (nieuwe snelheid, v = snelheidsvector)
+
+	//de benodigde variabelen
+	btVector3 direction;//u
+	btVector3 traction;//Ftraction
+	float engineForce = car.carSpeed;//Engineforce
+	btVector3 speed = car.direction;///v
+	float cdrag = 0.3f;//Cdrag
+	btVector3 drag;//weerstandskracht Fdrag	
+	btVector3 rollResistance;//Frr
+	btVector3 acceleration;//a
+	float mass;//massa
+	btVector3 totalForce;//Ftotaal
+	//variabelen instellen
+	//engineForce:Engineforce
+	if (wiiMoteWrapper->buttonOne){//speed goes down
+		engineForce -= car.MAXFORCE * timeFactor;
+	}
+	if (wiiMoteWrapper->buttonTwo){//speed goes up
+		engineForce += car.MAXFORCE * timeFactor;
+	}
+	//direction:u
+	float r = (btRadians(10.0f/*wiiMoteWrapper->degrees*/) + car.carRadians);
+	car.carRadians = r;
+	//traction:Ftraction
+	traction = btVector3(engineForce, 0, 0).rotate(btVector3(0, 1.0f, 0), r);
+	//drag:weerstandskracht Fdrag
+	drag = -cdrag * speed *speed.length();
+	//rollResistance:Frr
+	rollResistance = cdrag*speed;
+	//totalForce:Ftotaal
+	totalForce = traction + drag + rollResistance;
+
 }
 
 void App::init(void)
@@ -100,8 +113,8 @@ void App::preFrame(double frameTime, double totalTime)
 	//camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
-	//updateCarSpeed(timeFctr);
-	testUpdate(timeFctr);
+	updateCarSpeed(timeFctr);
+	//testUpdate(timeFctr);
 
 	//camera
 	/*if (upArrow.getData() == ON)
@@ -121,10 +134,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glPushMatrix();
 	//camera->refresh();
 	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), physics.realCar->getOrientation().getAngle(), car.carSpeed);
 	glTranslatef(b.x(), 0, b.z());
-	glRotatef(physics.realCar->getOrientation().getAngle(), 0, 1, 0);
-	glScalef(0.5, 0.5, 0.5);
+	float angle = physics.realCar->getOrientation().getAngle();
+	glRotatef(angle, 0, 1, 0);
 	glBegin(GL_POLYGON);
 	glColor3f(1.0, 1.0, 0);
 	glVertex3f(1.0, 0, 1.0);
