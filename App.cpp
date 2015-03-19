@@ -81,17 +81,31 @@ void App::testUpdate(GLfloat timeFactor/*dt*/){
 		engineForce += car.MAXFORCE * timeFactor;
 	}
 	//direction:u
-	float r = (btRadians(10.0f/*wiiMoteWrapper->degrees*/) + car.carRadians);
-	car.carRadians = r;
+	float r = (btRadians(wiiMoteWrapper->degrees) + car.carRadians);
 	//traction:Ftraction
 	traction = btVector3(engineForce, 0, 0).rotate(btVector3(0, 1.0f, 0), r);
 	//drag:weerstandskracht Fdrag
 	drag = -cdrag * speed *speed.length();
 	//rollResistance:Frr
-	rollResistance = cdrag*speed;
+	rollResistance = -0*speed;
 	//totalForce:Ftotaal
 	totalForce = traction + drag + rollResistance;
-
+	//acceleration:a
+	acceleration = totalForce / 10.0f;
+	//speed:v
+	speed += acceleration*timeFactor;
+	//het een en ander in car zetten
+	car.direction = speed;
+	car.carSpeed = engineForce;
+	car.carRadians = r;
+	//bullet updaten
+	physics.realCar->applyTorque(speed);
+	physics.realCar->activate();
+	physics.world->stepSimulation(timeFactor);//en updaten	
+	//debug
+	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
+	//printf("%f,%f,%f\n", totalForce.x(), totalForce.y(), totalForce.z());
+	printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), car.carRadians, car.direction.length());
 }
 
 void App::init(void)
@@ -113,8 +127,8 @@ void App::preFrame(double frameTime, double totalTime)
 	//camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
-	updateCarSpeed(timeFctr);
-	//testUpdate(timeFctr);
+	//updateCarSpeed(timeFctr);
+	testUpdate(timeFctr);
 
 	//camera
 	/*if (upArrow.getData() == ON)
@@ -136,7 +150,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
 	glTranslatef(b.x(), 0, b.z());
 	float angle = physics.realCar->getOrientation().getAngle();
-	glRotatef(angle, 0, 1, 0);
+	glRotatef(car.carRadians, 0, 1, 0);
 	glBegin(GL_POLYGON);
 	glColor3f(1.0, 1.0, 0);
 	glVertex3f(1.0, 0, 1.0);

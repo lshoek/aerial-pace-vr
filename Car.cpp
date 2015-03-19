@@ -4,9 +4,9 @@ Car::Car()
 {
 	carSpeed = steeringWheelDegrees = 0;
 	carRadians = 0;
-	MAXFORCE = 3.0f;
+	MAXFORCE = 5.0f;
 
-	
+	direction = btVector3(0, 0, 0);
 }
 
 void Car::initCar(){
