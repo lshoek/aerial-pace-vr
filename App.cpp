@@ -2,16 +2,13 @@
 #define _USE_MATH_DEFINES
 #include <GL\glew.h>
 #include <Windows.h>
-#include "App.h"
-#include "Physics.h"
 #include <CaveLib\model.h>
+#include "App.h"
 
 App::App(WiiMoteWrapper * w){
 	wiiMoteWrapper = w; 
 }
 App::~App(void){}
-
-
 
 int App::updateCarSpeed(GLfloat timeFactor){
 	
@@ -112,8 +109,8 @@ void App::init(void)
 {
 	upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
 	physics.bullet3Init();
+	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
 	//classicFont = new Font("data/aerial-pace-vr/fonts/classicfnt32.fnt", "data/aerial-pace-vr/fonts/classicfnt32.png");
-	//checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
 	//camera = new Camera();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -195,8 +192,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glVertex3f(-0, 0, -0);
 	glEnd();
 	//glScalef(0.3, 0.3, 0.3);
-	//gltrans
-	//checkers_model->draw();
+
 	glPopMatrix();
 	//setworldtransform
 	for each (btRigidBody* floor in physics.floorParts)
@@ -211,29 +207,10 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 		glVertex3f(-0, 0, 1.0);
 		glVertex3f(-0, 0, -0);
 		glEnd();
-		//DrawWireFrame();
 		glPopMatrix();
 	}
-	
+	glScalef(100.0f, 100.0f, 100.0f);
+	checkers_model->draw();
+	DrawWireFrame();
 	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
-}
-
-void App::DrawWireFrame(void)
-{
-	glPushMatrix();
-	glLineWidth(1.0);
-	glColor3f(1.0, 0.0, 0.0);
-	glTranslatef(0.0f, -0.05f, 0.0f);
-	for (float i = -2.0f; i <= 2.0f; i+=0.1f)
-	{
-		glBegin(GL_LINES);
-		glVertex3f(i, 0.0f, -2.0f);
-		glVertex3f(i, 0.0f, 2.0f);
-		glEnd();
-		glBegin(GL_LINES);
-		glVertex3f(-2.0f, 0.0f, i);
-		glVertex3f(2.0f, 0.0f, i);
-		glEnd();
-	}
-	glPopMatrix();
 }
