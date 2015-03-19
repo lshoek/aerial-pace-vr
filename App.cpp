@@ -8,11 +8,12 @@
 
 App::App(WiiMoteWrapper * w){
 	wiiMoteWrapper = w; 
+	car.initCar(w, &physics);
 }
 App::~App(void){}
 
 
-
+/*nog niet weghalen
 int App::updateCarSpeed(GLfloat timeFactor){
 	
 	if (!wiiMoteWrapper || !physics.world)
@@ -30,7 +31,7 @@ int App::updateCarSpeed(GLfloat timeFactor){
 	car.carSpeed += newSpeed;
 	car.carRadians = r;
 	btQuaternion rotation = physics.realCar->getOrientation();
-	float rotationAngle = rotation.getAngle() + btRadians(/*wiiMoteWrapper->degrees*/30.0f);
+	float rotationAngle = rotation.getAngle() + btRadians(30.0f);//wiiMoteWrapper->degrees
 	btQuaternion newRotation = btQuaternion(btVector3(0,1.0f,0), rotationAngle);
 	//newRotation *= rotation;
 	physics.realCar->getWorldTransform().setRotation(newRotation);
@@ -42,79 +43,15 @@ int App::updateCarSpeed(GLfloat timeFactor){
 	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
 	printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), physics.realCar->getOrientation().getAngle(), car.carSpeed);
 	return 1;//succes!
-}
-
-void App::testUpdate(GLfloat timeFactor/*dt*/){
-	//u = richting waar de auto heengaat
-	//Ftraction = u * Engineforce (nieuwe snelheid,engineforce is van knop 1 en 2)
-
-	//Fdrag = -Cdrag * v * | v | (weerstandskracht (vector), v is de vector van de huidige snelheid)
-
-	//rolweerstand
-	//Frr = - Crr * v
-	//where Crr is a constant and v is the velocity vector.
-
-	//Ftotaal (Flong) = Ftraction + Fdrag + Frr of Ftotaal = Fbraking + Fdrag   + Frr (versnellen of remmen)
-	//Fbraking = Fbraking = -u * Cbraking (als het nodig is
-
-	//a = F / M (versnellingsvector = Ftotaal / massa
-
-	//v = v + dt*a (nieuwe snelheid, v = snelheidsvector)
-
-	//de benodigde variabelen
-	btVector3 direction;//u
-	btVector3 traction;//Ftraction
-	float engineForce = car.carSpeed;//Engineforce
-	btVector3 speed = car.direction;///v
-	float cdrag = 0.3f;//Cdrag
-	btVector3 drag;//weerstandskracht Fdrag	
-	btVector3 rollResistance;//Frr
-	btVector3 acceleration;//a
-	float mass;//massa
-	btVector3 totalForce;//Ftotaal
-	//variabelen instellen
-	//engineForce:Engineforce
-	if (wiiMoteWrapper->buttonOne){//speed goes down
-		engineForce -= car.MAXFORCE * timeFactor;
-	}
-	if (wiiMoteWrapper->buttonTwo){//speed goes up
-		engineForce += car.MAXFORCE * timeFactor;
-	}
-	//direction:u
-	float r = (btRadians(wiiMoteWrapper->degrees) + car.carRadians);
-	//traction:Ftraction
-	traction = btVector3(engineForce, 0, 0).rotate(btVector3(0, 1.0f, 0), r);
-	//drag:weerstandskracht Fdrag
-	drag = -cdrag * speed *speed.length();
-	//rollResistance:Frr
-	rollResistance = -0*speed;
-	//totalForce:Ftotaal
-	totalForce = traction + drag + rollResistance;
-	//acceleration:a
-	acceleration = totalForce / 10.0f;
-	//speed:v
-	speed += acceleration*timeFactor;
-	//het een en ander in car zetten
-	car.direction = speed;
-	car.carSpeed = engineForce;
-	car.carRadians = r;
-	//bullet updaten
-	physics.realCar->applyTorque(speed);
-	physics.realCar->activate();
-	physics.world->stepSimulation(timeFactor);//en updaten	
-	//debug
-	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	//printf("%f,%f,%f\n", totalForce.x(), totalForce.y(), totalForce.z());
-	printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), car.carRadians, car.direction.length());
-}
+}*/
 
 void App::init(void)
 {
-	upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
+	//upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
 	physics.bullet3Init();
 	//classicFont = new Font("data/aerial-pace-vr/fonts/classicfnt32.fnt", "data/aerial-pace-vr/fonts/classicfnt32.png");
-	//checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
-	//camera = new Camera();
+	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
+	camera = new Camera();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 }
@@ -124,11 +61,12 @@ void App::preFrame(double frameTime, double totalTime)
 	// timer
 	clock_t clock_end = clock();
 	GLfloat timeFctr = GLfloat(clock_end - clock_start) / CLOCKS_PER_SEC; // calculate time(s) elapsed since last frame
-	//camera->tf = timeFctr;
+	camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
 	//updateCarSpeed(timeFctr);
-	testUpdate(timeFctr);
+	//testUpdate(timeFctr);
+	car.updateCar(timeFctr);
 
 	//camera
 	/*if (upArrow.getData() == ON)
@@ -146,57 +84,15 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glEnable(GL_COLOR_MATERIAL);
 	
 	glPushMatrix();
-	//camera->refresh();
+	camera->refresh();
 	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
+	b = car.direction;
 	glTranslatef(b.x(), 0, b.z());
+	//glTranslatef()
+	checkers_model->bbox.bounds;
 	float angle = physics.realCar->getOrientation().getAngle();
 	glRotatef(car.carRadians, 0, 1, 0);
-	glBegin(GL_POLYGON);
-	glColor3f(1.0, 1.0, 0);
-	glVertex3f(1.0, 0, 1.0);
-	glVertex3f(1.0, 1, 1.0);
-	glVertex3f(0, 1, 1.0);
-	glVertex3f(0, 0, 1.0);
-	glEnd();
-
-	/*// Purple side - RIGHT
-	glBegin(GL_POLYGON);
-	glColor3f(1.0, 0.0, 1.0);
-	glVertex3f(1.0, 0, 0);
-	glVertex3f(1.0, 1.0, 0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(1.0, 0, 1.0);
-	glEnd();
-
-	// Green side - LEFT
-	glBegin(GL_POLYGON);
-	glColor3f(0.0, 1.0, 0.0);
-	glVertex3f(0, 0, 1.0);
-	glVertex3f(-0, 1.0, 1.0);
-	glVertex3f(-0, 1.0, 0);
-	glVertex3f(-0, 0, -0);
-	glEnd();
-
-	// Blue side - TOP
-	glBegin(GL_POLYGON);
-	glColor3f(0.0, 0.0, 1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(1.0, 1.0, -0);
-	glVertex3f(-0, 1.0, -0);
-	glVertex3f(-0, 1.0, 1.0);
-	glEnd();*/
-
-	// Red side - BOTTOM
-	glBegin(GL_POLYGON);
-	glColor3f(1.0, 0.0, 0.0);
-	glVertex3f(1.0, 0, -0);
-	glVertex3f(1.0, 0, 1.0);
-	glVertex3f(-0, 0, 1.0);
-	glVertex3f(-0, 0, -0);
-	glEnd();
-	//glScalef(0.3, 0.3, 0.3);
-	//gltrans
-	//checkers_model->draw();
+	checkers_model->draw();
 	glPopMatrix();
 	//setworldtransform
 	for each (btRigidBody* floor in physics.floorParts)

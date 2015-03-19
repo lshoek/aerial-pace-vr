@@ -27,13 +27,11 @@ class App : public Application
 		DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
 		cModel* checkers_model;
 		WiiMoteWrapper * wiiMoteWrapper;
-		//Camera* camera;
+		Camera* camera;
 		GLint fps;
 		clock_t clock_start = clock();
 		Physics physics;
-		Font* classicFont;
-		
-		
+		Font* classicFont;	
 
 	public:
 		App(WiiMoteWrapper * w);
@@ -41,8 +39,6 @@ class App : public Application
 		Car car;
 
 		void init();
-		void testUpdate(GLfloat timeFactor);
-		int updateCarSpeed(GLfloat timeFactor);
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
 		void DrawWireFrame();
