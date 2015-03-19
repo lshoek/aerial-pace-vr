@@ -14,8 +14,6 @@ public:
 
 	void updateCar(float timeFactor);
 
-	//graden van wielen
-	float steeringWheelDegrees;
 	//graden van auto
 	float carRadians;
 	//snelheid van auto
@@ -23,7 +21,8 @@ public:
 	//maximale snelheid
 	float MAXFORCE;
 	btVector3 direction;
+	btVector3 speedVector;
+	btVector3 position;
 	WiiMoteWrapper * wiiMoteWrapper;
 	Physics * physics;
 };
-

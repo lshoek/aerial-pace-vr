@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
 	// Load any config files specified on the command line	
 	
 	thread t([&](WiiMoteWrapper * w2){ w2->start(); },&w);
-	//while (w.status == 0){}
-	/*if (w.status != 1)
+	/*while (w.status == 0){}
+	if (w.status != 1)
 	{
 		printf("geen wiimote");
 		std::string name;

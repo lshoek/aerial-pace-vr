@@ -5,7 +5,8 @@
 #include <CaveLib\model.h>
 #include "App.h"
 
-App::App(WiiMoteWrapper * w){
+App::App(WiiMoteWrapper* w)
+{
 	wiiMoteWrapper = w; 
 	car.initCar(w, &physics);
 }
@@ -31,10 +32,11 @@ void App::preFrame(double frameTime, double totalTime)
 	camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
-	//updateCarSpeed(timeFctr);
-	//testUpdate(timeFctr);
-	car.updateCar(timeFctr);
 
+	//car
+	car.updateCar(timeFctr);
+	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
+	
 	//camera
 	/*if (upArrow.getData() == ON)
 		camera->updateSpeed();
@@ -48,34 +50,25 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_COLOR_MATERIAL);
-	
+	glEnable(GL_COLOR_MATERIAL);	
+	checkers_model->draw();
 	glPushMatrix();
 	camera->refresh();
-	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	b = car.direction;
 	
-	//glTranslatef()
+	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
 	float angle = physics.realCar->getOrientation().getAngle();
-	glRotatef(car.carRadians, 0, 1, 0);
-	checkers_model->draw();
-	//setworldtransform
+	glTranslatef(b.x(), 0, b.z());
+	DrawWireFrame();
+	//glRotatef(car.carRadians, 0, 1, 0);	
 	for each (btRigidBody* floor in physics.floorParts)
 	{
 		btVector3 b = floor->getWorldTransform().getOrigin();
 		glPushMatrix();
 		glTranslatef(b.x(), b.y(), b.z());
 		glColor3f(0.3, 0.5, 0.7);
-		glBegin(GL_POLYGON);
-		glVertex3f(1.0, 0, -0);
-		glVertex3f(1.0, 0, 1.0);
-		glVertex3f(-0, 0, 1.0);
-		glVertex3f(-0, 0, -0);
-		glEnd();
+		DrawWireFrame();
 		glPopMatrix();
 	}
-	glScalef(100.0f, 100.0f, 100.0f);
-	glTranslatef(b.x(), 0, b.z());
-	DrawWireFrame();
 	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
+	
 }
