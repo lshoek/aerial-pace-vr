@@ -43,7 +43,8 @@ void App::preFrame(double frameTime, double totalTime)
 
 	//car
 	car.updateCar(timeFctr);
-
+	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
+	
 	//camera
 	if (upArrow.getData() == ON)
 		camera->updateSpeed();
@@ -57,17 +58,23 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
+<<<<<<< HEAD
 	glEnable(GL_COLOR_MATERIAL);
 
 	// camera
 	//camera->refresh();
 
 	// physics
+=======
+	glEnable(GL_COLOR_MATERIAL);	
+	checkers_model->draw();
+	glPushMatrix();
+	camera->refresh();
+	
+>>>>>>> 4445fa04530981080460ef123d79159421419f29
 	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	b = car.direction;
-	glTranslatef(b.x(), 0, b.z());
-	checkers_model->bbox.bounds;
 	float angle = physics.realCar->getOrientation().getAngle();
+<<<<<<< HEAD
 	glRotatef(car.carRadians, 0, 1, 0);
 
 	// shader
@@ -78,7 +85,20 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glUseProgram(0);
 
 	// etc
-	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
-	glScalef(100.0f, 100.0f, 100.0f);
+=======
+	glTranslatef(b.x(), 0, b.z());
 	DrawWireFrame();
+	//glRotatef(car.carRadians, 0, 1, 0);	
+	for each (btRigidBody* floor in physics.floorParts)
+	{
+		btVector3 b = floor->getWorldTransform().getOrigin();
+		glPushMatrix();
+		glTranslatef(b.x(), b.y(), b.z());
+		glColor3f(0.3, 0.5, 0.7);
+		DrawWireFrame();
+		glPopMatrix();
+	}
+>>>>>>> 4445fa04530981080460ef123d79159421419f29
+	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
+	
 }
