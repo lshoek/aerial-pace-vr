@@ -14,7 +14,8 @@
 #include "Glyph.h"
 #include "Font.h"
 #include "DebugFunctions.h"
-
+//#include "Shader.h"
+#include <CaveLib\Shader.h>
 // load from json?
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
@@ -33,6 +34,7 @@ class App : public Application
 		clock_t clock_start = clock();
 		Physics physics;
 		Font* classicFont;	
+		ShaderProgram* caveShader;
 
 	public:
 		App(WiiMoteWrapper * w);

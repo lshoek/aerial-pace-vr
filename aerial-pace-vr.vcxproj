@@ -99,7 +99,6 @@
     <ClCompile Include="Glyph.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Physics.cpp" />
-    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="WiiYourself\WiiLib.cpp" />
     <ClCompile Include="WiiYourself\wiimote.cpp" />
     <ClCompile Include="WiiYourself\WiiMoteWrapper.cpp" />
@@ -112,16 +111,11 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="Glyph.h" />
     <ClInclude Include="Physics.h" />
-    <ClInclude Include="Shader.h" />
     <ClInclude Include="WiiYourself\WiiLib.h" />
     <ClInclude Include="WiiYourself\wiimote.h" />
     <ClInclude Include="WiiYourself\WiiMoteWrapper.h" />
     <ClInclude Include="WiiYourself\wiimote_common.h" />
     <ClInclude Include="WiiYourself\wiimote_state.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="simple.frag" />
-    <None Include="simple.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
