@@ -43,7 +43,8 @@ void App::preFrame(double frameTime, double totalTime)
 
 	//car
 	car.updateCar(timeFctr);
-
+	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
+	
 	//camera
 	if (upArrow.getData() == ON)
 		camera->updateSpeed();
@@ -63,8 +64,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	//camera->refresh();
 
 	// physics
+	
 	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	b = car.direction;
+	float angle = physics.realCar->getOrientation().getAngle();
 	glTranslatef(b.x(), 0, b.z());
 	checkers_model->bbox.bounds;
 	float angle = physics.realCar->getOrientation().getAngle();
@@ -76,9 +78,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	caveShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	checkers_model->draw(caveShader);
 	glUseProgram(0);
-
 	// etc
 	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
-	glScalef(100.0f, 100.0f, 100.0f);
-	DrawWireFrame();
+	
 }

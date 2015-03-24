@@ -64,7 +64,7 @@ void Physics::addCar(){
 	realCar = new btRigidBody(rbInfo);
 	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), 0);
 	realCar->getWorldTransform().setRotation(newRotation);
-	realCar->setGravity(btVector3(0, -10, 0));
+	//realCar->setGravity(btVector3(0, -10, 0));
 	world->addRigidBody(realCar);
 	// inform our world that we just created a new rigid body for 
 	// it to manage
