@@ -9,7 +9,6 @@
 #include "WiiYourself/WiiMoteWrapper.h"
 #include <ctime>
 #include "Camera.h"
-#include "Car.h"
 #include "Physics.h"
 #include "Glyph.h"
 #include "Font.h"
@@ -41,7 +40,6 @@ class App : public Application
 		~App(void);
 
 		static const string SHADERLOCATION;
-		Car car;
 
 		void init();
 		void preFrame(double frameTime, double totalTime);

@@ -1,5 +1,6 @@
 #include "Physics.h"
 
+const float Physics::MAXFORCE = 100.0f;
 
 Physics::Physics()
 {
@@ -15,7 +16,8 @@ Physics::~Physics()
 	floorParts.clear();
 }
 
-int Physics::bullet3Init(){
+int Physics::bullet3Init(WiiMoteWrapper* w){
+	wiiMoteWrapper = w;
 	broadphase = new btDbvtBroadphase();
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
@@ -23,7 +25,7 @@ int Physics::bullet3Init(){
 	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 	world->setGravity(btVector3(0, 0, 0));
 	world->setGravity(btVector3(0,-10,0));
-	addFloor(btVector3(100, 1, 100), btVector3(-50, -2, 50));
+	addFloor(btVector3(50, 1, 50), btVector3(-25, -2, 25));
 
 	addCar();
 	return 1;
@@ -40,11 +42,7 @@ void Physics::addFloor(const btVector3 &size, const btVector3 &origin){
 	// mass of 1, the motion state, and the shape
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(0, m_pMotionState, pBoxShape);
 	floorParts.push_back(new btRigidBody(rbInfo));
-
-	for each (btRigidBody* btb in floorParts)
-	{
-		world->addRigidBody(btb);
-	}
+	world->addRigidBody(floorParts.back());
 }
 
 void Physics::addCar(){
@@ -71,4 +69,29 @@ void Physics::addCar(){
 	world->addRigidBody(realCar);
 	// inform our world that we just created a new rigid body for 
 	// it to manage
+}
+
+void Physics::updateCar(float timeFactor){
+	float deltaspeed = 0;
+	if (wiiMoteWrapper->buttonOne){//speed goes down
+		deltaspeed -= MAXFORCE * timeFactor;
+	}
+	if (wiiMoteWrapper->buttonTwo){//speed goes up
+		deltaspeed += MAXFORCE * timeFactor;
+	}
+	btVector3 deltaposition(deltaspeed, 0, deltaspeed);
+	float rotationFactor = btRadians(wiiMoteWrapper->degrees);
+	realCar->applyTorque(btVector3(0, rotationFactor, 0));
+	float mvpRaw[16];
+	realCar->getCenterOfMassTransform().getOpenGLMatrix(mvpRaw);
+	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
+	glm::vec4 p1 = glm::vec4(0, 0, 0, 1)*carmvp;
+	glm::vec4 p2 = glm::vec4(1, 0, 0, 1)*carmvp;
+	btVector3 p3(p2.x - p1.x, 0, p2.z - p1.z);
+	realCar->applyCentralForce(deltaposition*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
+	realCar->activate();
+	world->stepSimulation(timeFactor);//en updaten	
+
+	btVector3 b2 = realCar->getWorldTransform().getOrigin();
+	//printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), rotationFactor);
 }

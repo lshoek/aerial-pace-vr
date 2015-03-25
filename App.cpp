@@ -11,7 +11,6 @@ const string App::SHADERLOCATION = "data/aerial-pace-vr/shaders/";
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w; 
-	car.initCar(w, &physics);
 }
 App::~App(void){}
 
@@ -19,7 +18,7 @@ void App::init(void)
 {
 	//classicFont = new Font("data/aerial-pace-vr/fonts/classicfnt32.fnt", "data/aerial-pace-vr/fonts/classicfnt32.png");
 	upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
-	physics.bullet3Init();
+	physics.bullet3Init(wiiMoteWrapper);
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
 	camera = new Camera();
 
@@ -44,7 +43,7 @@ void App::preFrame(double frameTime, double totalTime)
 	camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
-	car.updateCar(timeFctr);
+	physics.updateCar(timeFctr);
 	//camera
 	/*if (upArrow.getData() == ON)
 		camera->updateSpeed();
@@ -64,31 +63,11 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	DrawWireFrame();
 	glPopMatrix();
 
-	// camera
-	//camera->refresh();
-
-	// physics
-	/*btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	
-	float angle = physics.realCar->getOrientation().getAngle();
-	
-
-	// shader
-	glm::mat4 carmvp(1.0f, 0, 0, b.x(),
-		0, 1.0f, 0, b.y(),
-		0, 0, 1.0f, b.z(),
-		0, 0, 0, 1.0f);*/
-
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
 	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
 
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	//caveShader->use();
-	//caveShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
-	//glTranslatef(b.x(), 0, b.z());
-	//glRotatef(car.carRadians, 0, 1, 0);
-
 	glMultMatrixf(glm::value_ptr(carmvp));
 
 	checkers_model->draw(caveShader);
