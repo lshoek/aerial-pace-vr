@@ -4,7 +4,6 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Car.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Font.cpp" />
@@ -22,7 +21,6 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Shader.h" />
     <ClInclude Include="Car.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Font.h" />
@@ -43,10 +41,6 @@
       <Filter>WiiYourself</Filter>
     </ClInclude>
     <ClInclude Include="DebugFunctions.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="simple.frag" />
-    <None Include="simple.vert" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="WiiYourself">
