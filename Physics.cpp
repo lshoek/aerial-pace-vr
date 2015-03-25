@@ -47,7 +47,7 @@ void Physics::addFloor(float x1, float x2, float x3){
 }
 
 void Physics::addCar(){
-	float mass = 10.0f;//kg
+	float mass = 1.0f;//kg
 	btVector3 fallInertia;
 	// create a box shape of size (1,1,1)
 	btBoxShape* pBoxShape = new btBoxShape(btVector3(1.0f, 1.0f, 1.0f));
@@ -56,7 +56,7 @@ void Physics::addCar(){
 	transform.setIdentity();
 	transform.setOrigin(btVector3(0.0f, 0.0f, 0.0f));
 	// create a motion state
-	btMotionState* m_pMotionState = new btDefaultMotionState(transform);
+	btMotionState* m_pMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0,0)));
 	// create the rigid body construction info object, giving it a 
 	// mass of 1, the motion state, and the shape
 	pBoxShape->calculateLocalInertia(mass, fallInertia);

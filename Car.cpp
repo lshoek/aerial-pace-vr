@@ -28,21 +28,22 @@ void Car::updateCar(float timeFactor){
 	if (wiiMoteWrapper->buttonTwo){//speed goes up
 		deltaspeed += MAXFORCE * timeFactor;
 	}
-	carSpeed += deltaspeed;
+	//deltaspeed += MAXFORCE * timeFactor;
+	//carSpeed += deltaspeed;
 	btVector3 deltaposition(deltaspeed, 0, 0);
-	physics->realCar->applyForce(deltaposition,btVector3(-0.3f,0,0));
-	btQuaternion rot(btVector3(0, 1.0f, 0), btRadians(wiiMoteWrapper->degrees));
-	physics->realCar->applyTorqueImpulse(btVector3(1.0f,0,0).rotate(btVector3(0,1.0f,0),btRadians(wiiMoteWrapper->degrees)));
+	
+	btVector3 torque(deltaspeed, 0, 0);
+	torque = torque.rotate(btVector3(0, 1.0f, 0), btRadians(wiiMoteWrapper->degrees ));
+	//physics->realCar->applyTorque(torque);
+	physics->realCar->applyForce(deltaposition.rotate(btVector3(0, 1.0f, 0), btRadians(wiiMoteWrapper->degrees)), btVector3(0, 0, 0));
 	physics->realCar->activate();
+	
+	//physics->realCar->activate();
 	physics->world->stepSimulation(timeFactor);//en updaten	
+
 	btVector3 b2 = physics->realCar->getWorldTransform().getOrigin();
-	//printf("%f,%f,%f\n", totalForce.x(), totalForce.y(), totalForce.z());
-	printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), carRadians);
-	return;
-	carRadians += btRadians(wiiMoteWrapper->degrees);
-	direction = direction.rotate(btVector3(0, 1.0f, 0), btRadians(wiiMoteWrapper->degrees)).normalize();
-	deltaposition = deltaposition*direction;
-	position += deltaposition;
+	float x = 0;
+	printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), x);
 
 	return;
 	//u = richting waar de auto heengaat
