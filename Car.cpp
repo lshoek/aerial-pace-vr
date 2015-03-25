@@ -37,7 +37,7 @@ void Car::updateCar(float timeFactor){
 	physics->world->stepSimulation(timeFactor);//en updaten	
 	btVector3 b2 = physics->realCar->getWorldTransform().getOrigin();
 	//printf("%f,%f,%f\n", totalForce.x(), totalForce.y(), totalForce.z());
-	printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), carRadians);
+//	printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), carRadians);
 	return;
 	carRadians += btRadians(wiiMoteWrapper->degrees);
 	direction = direction.rotate(btVector3(0, 1.0f, 0), btRadians(wiiMoteWrapper->degrees)).normalize();
