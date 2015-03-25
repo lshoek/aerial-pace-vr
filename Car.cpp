@@ -3,8 +3,8 @@
 Car::Car()
 {
 	carSpeed = 0;
-	carRadians = 0;
-	MAXFORCE = 5.0f;
+	carDegrees = 0;
+	MAXFORCE = 100.0f;
 	
 	direction = btVector3(1, 0, 0);
 	speedVector = btVector3(0, 0, 0);
@@ -28,22 +28,25 @@ void Car::updateCar(float timeFactor){
 	if (wiiMoteWrapper->buttonTwo){//speed goes up
 		deltaspeed += MAXFORCE * timeFactor;
 	}
-	//deltaspeed += MAXFORCE * timeFactor;
-	//carSpeed += deltaspeed;
-	btVector3 deltaposition(deltaspeed, 0, 0);
-	
-	btVector3 torque(deltaspeed, 0, 0);
-	torque = torque.rotate(btVector3(0, 1.0f, 0), btRadians(wiiMoteWrapper->degrees ));
-	//physics->realCar->applyTorque(torque);
-	physics->realCar->applyForce(deltaposition.rotate(btVector3(0, 1.0f, 0), btRadians(wiiMoteWrapper->degrees)), btVector3(0, 0, 0));
+	btVector3 deltaposition(deltaspeed, 0, deltaspeed);
+	carDegrees += wiiMoteWrapper->degrees;
+	float rotationFactor = btRadians(wiiMoteWrapper->degrees);
+	physics->realCar->applyTorque(btVector3(0, rotationFactor, 0));
+	float mvpRaw[16];
+	physics->realCar->getCenterOfMassTransform().getOpenGLMatrix(mvpRaw);
+	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
+	glm::vec4 p1 = glm::vec4(0, 0, 0, 1)*carmvp;
+	glm::vec4 p2 = glm::vec4(1, 0, 0, 1)*carmvp;
+	btVector3 p3(p2.x - p1.x, 0, p2.z - p1.z);
+	physics->realCar->applyCentralForce(deltaposition*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
 	physics->realCar->activate();
 	
 	//physics->realCar->activate();
 	physics->world->stepSimulation(timeFactor);//en updaten	
 
 	btVector3 b2 = physics->realCar->getWorldTransform().getOrigin();
-	float x = 0;
-	printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), x);
+	printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), rotationFactor);
+//	printf("rotatie: %f\t%f\t%f\n", physics->realCar->getWorldTransform().getRotation())
 
 	return;
 	//u = richting waar de auto heengaat
@@ -108,7 +111,7 @@ void Car::updateCar(float timeFactor){
 	speedVector = speed;
 	direction = dir;
 	carSpeed = engineForce;
-	carRadians += r;
+	//carRadians += r;
 	//positie
 	position += timeFactor*speed;
 	//bullet updaten
@@ -119,5 +122,5 @@ void Car::updateCar(float timeFactor){
 	btVector3 b = physics->realCar->getWorldTransform().getOrigin();
 	b = position;
 	//printf("%f,%f,%f\n", totalForce.x(), totalForce.y(), totalForce.z());
-	printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), carRadians, engineForce);
+	//printf("auto %f,%f,%f :%f rad %f m/s\n", b.x(), b.y(), b.z(), carRadians, engineForce);
 }

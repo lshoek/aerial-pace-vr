@@ -4,6 +4,9 @@
 #include <Windows.h>
 #include <CaveLib\model.h>
 #include "App.h"
+#include <glm/gtc/type_ptr.hpp>
+
+const string App::SHADERLOCATION = "data/aerial-pace-vr/shaders/";
 
 App::App(WiiMoteWrapper* w)
 {
@@ -20,13 +23,14 @@ void App::init(void)
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
 	camera = new Camera();
 
-	caveShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");
+	//caveShader = new ShaderProgram(SHADERLOCATION + "simple.vert", SHADERLOCATION + "simple.frag");
+	caveShader = new ShaderProgram(SHADERLOCATION + "threshold.vert", SHADERLOCATION + "threshold.frag");
 	caveShader->bindAttributeLocation("a_position", 0);
 	caveShader->bindAttributeLocation("a_normal", 1);
 	caveShader->bindAttributeLocation("a_texcoord", 2);
 	caveShader->link();
 	caveShader->use();
-	caveShader->setUniformInt("s_texture", 0);
+	caveShader->setUniformInt("s_texture", 3);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -55,26 +59,43 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
+	glPushMatrix();
+	glTranslatef(0, -1, 0);
+	DrawWireFrame();
+	glPopMatrix();
 
 	// camera
 	//camera->refresh();
 
 	// physics
-	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	b = car.direction;
-	glTranslatef(b.x(), 0, b.z());
+	/*btVector3 b = physics.realCar->getWorldTransform().getOrigin();
+	
 	float angle = physics.realCar->getOrientation().getAngle();
-	glRotatef(car.carRadians, 0, 1, 0);
+	
 
 	// shader
+	glm::mat4 carmvp(1.0f, 0, 0, b.x(),
+		0, 1.0f, 0, b.y(),
+		0, 0, 1.0f, b.z(),
+		0, 0, 0, 1.0f);*/
+
+	float mvpRaw[16];
+	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
+	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
+
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	caveShader->use();
-	caveShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
+	//caveShader->use();
+	//caveShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
+	//glTranslatef(b.x(), 0, b.z());
+	//glRotatef(car.carRadians, 0, 1, 0);
+
+	glMultMatrixf(glm::value_ptr(carmvp));
+
 	checkers_model->draw(caveShader);
 	glUseProgram(0);
 
 	// etc
 	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
-	glScalef(100.0f, 100.0f, 100.0f);
+	glTranslatef(3, 0, 0);
 	DrawWireFrame();
 }

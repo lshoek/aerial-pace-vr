@@ -1,6 +1,7 @@
 #pragma once
 
 #include <btBulletDynamicsCommon.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "WiiYourself\WiiMoteWrapper.h"
 #include "Physics.h"
 
@@ -15,7 +16,7 @@ public:
 	void updateCar(float timeFactor);
 
 	//graden van auto
-	float carRadians;
+	int carDegrees;
 	//snelheid van auto
 	float carSpeed;
 	//maximale snelheid

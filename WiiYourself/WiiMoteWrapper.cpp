@@ -268,6 +268,9 @@ reconnect:
 		//if (remote.Acceleration.Orientation.UpdateAge > 10)
 		//	RED;
 		degrees = remote.Acceleration.Orientation.Pitch;
+		remote.MotionPlus.Speed.Yaw;
+		while (degrees > 360.0) degrees -= 360.0;
+		while (degrees < -360.0) degrees += 360.0;
 		/*_tprintf(_T("Pitch:%4ddeg  Roll:%4ddeg  \n")
 			_T("                           (X %+.3f  Y %+.3f  Z %+.3f)      \n"),
 			(int)remote.Acceleration.Orientation.Pitch,

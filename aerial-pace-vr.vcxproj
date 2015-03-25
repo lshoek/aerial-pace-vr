@@ -95,6 +95,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Car.cpp" />
+    <ClCompile Include="FloorPart.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Glyph.cpp" />
     <ClCompile Include="main.cpp" />
@@ -108,6 +109,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Car.h" />
     <ClInclude Include="DebugFunctions.h" />
+    <ClInclude Include="FloorPart.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="Glyph.h" />
     <ClInclude Include="Physics.h" />

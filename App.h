@@ -22,7 +22,7 @@
 
 class App : public Application
 {
-	private:
+	private:		
 		//PositionalDevice wand;
 		//PositionalDevice head;
 		DigitalDevice leftButton;
@@ -39,6 +39,8 @@ class App : public Application
 	public:
 		App(WiiMoteWrapper * w);
 		~App(void);
+
+		static const string SHADERLOCATION;
 		Car car;
 
 		void init();

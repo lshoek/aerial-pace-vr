@@ -22,17 +22,18 @@ int Physics::bullet3Init(){
 	solver = new btSequentialImpulseConstraintSolver();
 	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 	world->setGravity(btVector3(0, 0, 0));
-	//addFloor(-1.0,-1.0,-1.0);
+	world->setGravity(btVector3(0,-10,0));
+	addFloor(btVector3(100, 1, 100), btVector3(-50, -2, 50));
+
 	addCar();
 	return 1;
 }
 
-void Physics::addFloor(float x1, float x2, float x3){
-	btBoxShape* pBoxShape = new btBoxShape(btVector3(3.0f, 0.05f, 3.0f));
-	// give our box an initial position of (0,0,0)
+void Physics::addFloor(const btVector3 &size, const btVector3 &origin){
+	btBoxShape* pBoxShape = new btBoxShape(btVector3(size));
 	btTransform transform;
 	transform.setIdentity();
-	transform.setOrigin(btVector3(x1,x2,x3));
+	transform.setOrigin(origin);
 	// create a motion state
 	btMotionState* m_pMotionState = new btDefaultMotionState(transform);
 	// create the rigid body construction info object, giving it a 
@@ -63,8 +64,10 @@ void Physics::addCar(){
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, m_pMotionState, pBoxShape,fallInertia);
 	realCar = new btRigidBody(rbInfo);
 	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), 0);
+	
 	realCar->getWorldTransform().setRotation(newRotation);
 	//realCar->setGravity(btVector3(0, -10, 0));
+	realCar->setFriction(0.1);
 	world->addRigidBody(realCar);
 	// inform our world that we just created a new rigid body for 
 	// it to manage

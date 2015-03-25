@@ -35,7 +35,7 @@ public:
 
 	int Physics::bullet3Init();
 	void addCar();
-	void addFloor(float x1, float x2, float x3);
+	void addFloor(const btVector3 &size, const btVector3 &origin);
 	btRigidBody * realCar;
 	vector<btRigidBody *> floorParts;
 };
