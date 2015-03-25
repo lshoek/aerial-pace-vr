@@ -4,7 +4,6 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Car.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="WiiYourself\WiiLib.cpp">
       <Filter>WiiYourself</Filter>
@@ -19,7 +18,6 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Car.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="WiiYourself\WiiMoteWrapper.h">
       <Filter>WiiYourself</Filter>

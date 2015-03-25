@@ -11,13 +11,12 @@
 #include "WiiYourself/WiiMoteWrapper.h"
 #include <ctime>
 #include "Camera.h"
-#include "Car.h"
 #include "Physics.h"
 #include "DebugFunctions.h"
 
 class App : public Application
 {
-	private:
+	private:		
 		//PositionalDevice wand;
 		//PositionalDevice head;
 		DigitalDevice leftButton;
@@ -33,7 +32,8 @@ class App : public Application
 	public:
 		App(WiiMoteWrapper * w);
 		~App(void);
-		Car car;
+
+		static const string SHADERLOCATION;
 
 		void init();
 		void preFrame(double frameTime, double totalTime);
