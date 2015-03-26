@@ -63,16 +63,11 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
-	glPushMatrix();
-	glTranslatef(0, -1, 0);
-	DrawWireFrame();
-	glPopMatrix();
 
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
 	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
 
-	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
 	glMultMatrixf(glm::value_ptr(carmvp));
 
 	// Update the uniform time variable.
@@ -80,10 +75,18 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	GLfloat time = 0.0f;
 	time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
 
-	// Simple Shader
+	// Mvp
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
+	glm::mat3 normalMatrix = glm::mat3(0.5f);
+	// Simple Shader
 	simpleShader->use();
 	simpleShader->setUniformFloat("time", time);
+	noiseShader->setUniformVec4("lightPosition", glm::vec4(10.0f, 10.0f, 10.0f, 1.0f));
+	noiseShader->setUniformVec3("diffuseReflectivity", glm::vec3(1.0f));
+	noiseShader->setUniformVec3("lightSourceIntensity", glm::vec3(1.5f));
+	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
+	//noiseShader->setUniformMatrix3("normalMatrix", normalMatrix);
+	noiseShader->setUniformMatrix4("projectionMatrix", projectionMatrix);
 	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	checkers_model->draw(simpleShader);
 
@@ -92,6 +95,12 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	mvp = glm::translate(mvp, glm::vec3(0.0f, -2.0f, 0.0f));
 	noiseShader->use();
 	noiseShader->setUniformFloat("time", time);
+	noiseShader->setUniformVec4("lightPosition", glm::vec4(10.0f, 10.0f, 10.0f, 1.0f));
+	noiseShader->setUniformVec3("diffuseReflectivity", glm::vec3(1.0f));
+	noiseShader->setUniformVec3("lightSourceIntensity", glm::vec3(1.5f));
+	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
+	//noiseShader->setUniformMatrix3("normalMatrix", normalMatrix);
+	noiseShader->setUniformMatrix4("projectionMatrix", projectionMatrix);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
 	glUseProgram(0);
