@@ -61,7 +61,7 @@ void Physics::addCar(){
 	pBoxShape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, m_pMotionState, pBoxShape,fallInertia);
 	realCar = new btRigidBody(rbInfo);
-	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), 0);
+	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), btRadians(0));
 	
 	realCar->getWorldTransform().setRotation(newRotation);
 	//realCar->setGravity(btVector3(0, -10, 0));

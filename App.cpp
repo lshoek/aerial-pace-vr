@@ -63,22 +63,14 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
-	glPushMatrix();
-	glTranslatef(0, -1, 0);
-	DrawWireFrame();
-	glPopMatrix();
 
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
 	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
-
-	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
 	glMultMatrixf(glm::value_ptr(carmvp));
 
 	// Update the uniform time variable.
-	GLint location_time = -1;
-	GLfloat time = 0.0f;
-	time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
+	GLfloat time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
 
 	// Simple Shader
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
