@@ -13,6 +13,7 @@
 #include "Camera.h"
 #include "Physics.h"
 #include "DebugFunctions.h"
+#include "frameBufferObject.h"
 
 class App : public Application
 {
@@ -28,15 +29,14 @@ class App : public Application
 		clock_t clock_start = clock();
 		Physics physics;
 		ShaderProgram *simpleShader, *noiseShader;
+		FrameBufferObject fbo;
 
 		void drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time);
 
 	public:
 		App(WiiMoteWrapper * w);
 		~App(void);
-
-		static const string SHADERLOCATION;
-
+		
 		void init();
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);

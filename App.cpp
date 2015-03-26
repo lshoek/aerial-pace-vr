@@ -6,8 +6,6 @@
 #include "App.h"
 #include <glm/gtc/type_ptr.hpp>
 
-const string App::SHADERLOCATION = "data/aerial-pace-vr/shaders/";
-
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w; 
@@ -36,6 +34,16 @@ void App::init(void)
 	noiseShader->link();
 	noiseShader->setUniformInt("s_texture", 0);
 
+	fbo.endShader = new ShaderProgram("data/aerial-pace-vr/shaders/motionblur.vert", "data/aerial-pace-vr/shaders/motionblur.frag");
+
+	GLuint rboId;
+	glGenRenderbuffers(1, &rboId);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 2048, 2048);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 }
@@ -60,9 +68,12 @@ void App::preFrame(double frameTime, double totalTime)
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
+	//bind fbo
+	//glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboId);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
+	
 
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
@@ -105,9 +116,9 @@ void App::drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float r
 	noiseShader->setUniformVec4("lightPosition", glm::vec4(10.0f, 10.0f, 10.0f, 1.0f));
 	noiseShader->setUniformVec3("diffuseReflectivity", glm::vec3(1.0f));
 	noiseShader->setUniformVec3("lightSourceIntensity", glm::vec3(1.5f));
-	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
+	//noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	//noiseShader->setUniformMatrix3("normalMatrix", normalMatrix);
-	noiseShader->setUniformMatrix4("projectionMatrix", projectionMatrix);
+	//noiseShader->setUniformMatrix4("projectionMatrix", projectionMatrix);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
 }
