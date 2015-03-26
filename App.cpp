@@ -67,7 +67,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
 	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
-	glMultMatrixf(glm::value_ptr(carmvp));
+	//glMultMatrixf(glm::value_ptr(carmvp));
 
 	// Update the uniform time variable.
 	GLfloat time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
@@ -80,14 +80,20 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	checkers_model->draw(simpleShader);
 
 	// Noise Shader
-	mvp = glm::rotate(mvp, 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	mvp = glm::translate(mvp, glm::vec3(0.0f, -2.0f, 0.0f));
-	noiseShader->use();
-	noiseShader->setUniformFloat("time", time);
-	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
-	racetrack_model->draw(noiseShader);
+	drawStage(projectionMatrix * modelViewMatrix, physics.realCar->getWorldTransform().getOrigin(), M_PI + 0, time);
 	glUseProgram(0);
 
 	// Etc
 	DrawWireFrame();
+}
+
+void App::drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time){
+	glm::mat4 mvp = mvp1;	
+	mvp = glm::rotate(mvp, rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+	mvp = glm::translate(mvp, glm::vec3(translation.x(), translation.y() - 2.0f, translation.z()));
+	
+	noiseShader->use();
+	noiseShader->setUniformFloat("time", time);
+	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
+	racetrack_model->draw(noiseShader);
 }

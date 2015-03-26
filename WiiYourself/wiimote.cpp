@@ -2027,10 +2027,7 @@ unsigned __stdcall wiimote::HIDwriteThreadfunc (void* param)
 		if(!remote.HID.IsEmpty())
 #endif
 			{
-#ifdef BEEP_DEBUG_WRITES
-			Beep(1500,1);
-#endif
-			EnterCriticalSection(&remote.HIDwriteQueueLock);
+
 #ifdef USE_DYNAMIC_HIDQUEUE
 			 BYTE *buff = remote.HIDwriteQueue.front();
 			 _ASSERT(buff);

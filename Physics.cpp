@@ -25,7 +25,7 @@ int Physics::bullet3Init(WiiMoteWrapper* w){
 	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 	world->setGravity(btVector3(0, 0, 0));
 	world->setGravity(btVector3(0,-10,0));
-	addFloor(btVector3(50, 1, 50), btVector3(-25, -2, 25));
+	addFloor(btVector3(100, 1, 100), btVector3(-50, -2, 50));
 
 	addCar();
 	return 1;
@@ -64,7 +64,6 @@ void Physics::addCar(){
 	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), btRadians(0));
 	
 	realCar->getWorldTransform().setRotation(newRotation);
-	//realCar->setGravity(btVector3(0, -10, 0));
 	realCar->setFriction(0.1);
 	world->addRigidBody(realCar);
 	// inform our world that we just created a new rigid body for 
@@ -93,5 +92,5 @@ void Physics::updateCar(float timeFactor){
 	world->stepSimulation(timeFactor);//en updaten	
 
 	btVector3 b2 = realCar->getWorldTransform().getOrigin();
-	//printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), rotationFactor);
+	printf("auto %f,%f,%f :%f rad \n", b2.x(), b2.y(), b2.z(), rotationFactor);
 }
