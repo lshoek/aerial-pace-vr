@@ -11,8 +11,7 @@ int main(int argc, char* argv[])
 	Kernel* kernel = Kernel::getInstance();  // Get the kernel
 	WiiMoteWrapper w;
 	App* app = new App(&w);             // Instantiate an instance of the app	
-	// Load any config files specified on the command line	
-	
+	// Load any config files specified on the command line		
 	thread t([&](WiiMoteWrapper * w2){ w2->start(); },&w);
 	for (int i = 1; i < argc; ++i)
 	{
@@ -25,7 +24,6 @@ int main(int argc, char* argv[])
 	kernel->setApp(app);
 	kernel->start();	
 	delete app;
-	//stop wii library
 	w.continueGame = false;
 	t.join();
 	return 0;

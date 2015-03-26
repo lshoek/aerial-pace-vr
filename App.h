@@ -29,6 +29,8 @@ class App : public Application
 		Physics physics;
 		ShaderProgram *simpleShader, *noiseShader;
 
+		void drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time);
+
 	public:
 		App(WiiMoteWrapper * w);
 		~App(void);
