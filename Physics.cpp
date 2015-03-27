@@ -25,7 +25,7 @@ int Physics::bullet3Init(WiiMoteWrapper* w){
 	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 	world->setGravity(btVector3(0, 0, 0));
 	world->setGravity(btVector3(0,-10,0));
-	addFloor(btVector3(100, 1, 100), btVector3(-50, -2, 50));
+	//addFloor(btVector3(100, 1, 100), btVector3(-50, -2, 50));
 	addCar();
 	return 1;
 }

@@ -10,7 +10,9 @@ App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w; 
 }
-App::~App(void){}
+App::~App(void){
+	fbo.~FrameBufferObject();
+}
 
 void App::init(void)
 {
@@ -35,15 +37,8 @@ void App::init(void)
 	noiseShader->setUniformInt("s_texture", 0);
 
 	fbo.endShader = new ShaderProgram("data/aerial-pace-vr/shaders/motionblur.vert", "data/aerial-pace-vr/shaders/motionblur.frag");
-
-	GLuint rboId;
-	glGenRenderbuffers(1, &rboId);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 2048, 2048);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+	fbo.endShader->link();
+	fbo.initFBO();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 }
@@ -71,6 +66,12 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	//bind fbo
 	//glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboId);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//fbo.endShader->use();
+	//glBindTexture(GL_TEXTURE_2D, fbo.fboTextureId);
+	//glUniform1i(fbo.endShader->getUniformLocation("s_texture"), 0);
+	//glEnableVertexAttribArray(1);
+	//glBindBuffer(GL_ARRAY_BUFFER, fbo.vbo_fbo_vertices);
+
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
 	
@@ -100,15 +101,27 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Noise Shader
 	drawStage(projectionMatrix * modelViewMatrix, physics.realCar->getWorldTransform().getOrigin(), 180, time);
-	glUseProgram(0);
 
-	// Etc
 	DrawWireFrame();
+
+
+	/*fbo.endShader->use();
+	glEnableVertexAttribArray(1);							// en vertex attribute 1
+	glEnableVertexAttribArray(2);							// en vertex attribute 2 ook
+	glEnableVertexAttribArray(3);							// en vertex attribute 3 ook
+	glUniform1i(fbo.endShader->getUniformLocation("s_texture"), 0);
+
+	glBindTexture(GL_TEXTURE_2D, fbo.fboTextureId);
+	glDisableVertexAttribArray(1);							// disable vertex attribute 1
+	glDisableVertexAttribArray(2);							// en vertex attribute 2 ook
+	glDisableVertexAttribArray(3);							// en vertex attribute 3 ook
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &fbo.vbo_fbo_vertices);									//geef aan dat de posities op deze locatie zitten
+	glDrawArrays(GL_QUADS, 0, fbo.vbo_fbo_vertices);*/
 }
 
 void App::drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time){
 	glm::mat4 mvp = mvp1;	
-	mvp = glm::rotate(mvp, rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+	//mvp = glm::rotate(mvp, rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 	mvp = glm::translate(mvp, glm::vec3(translation.x(), translation.y() - 2.0f, translation.z()));
 	
 	noiseShader->use();
