@@ -99,7 +99,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	checkers_model->draw(simpleShader);
 
 	// Noise Shader
-	drawStage(projectionMatrix * modelViewMatrix, physics.realCar->getWorldTransform().getOrigin(), M_PI + 0, time);
+	drawStage(projectionMatrix * modelViewMatrix, physics.realCar->getWorldTransform().getOrigin(), 180, time);
 	glUseProgram(0);
 
 	// Etc
