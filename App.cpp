@@ -17,6 +17,8 @@ App::~App(void){
 
 void App::init(void)
 {
+	headDevice.init("MainUserHead");
+	cameraDevice.init("CameraPosition");
 	upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
 	physics.bullet3Init(wiiMoteWrapper);
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
@@ -25,7 +27,7 @@ void App::init(void)
 	camera = new Camera();
 	pointLight.position = glm::vec3(-30.0f, 5.0f, 40.0f);
 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLight.ambientCoefficient = 0.8f;
+	pointLight.ambientCoefficient = 0.5f;
 	pointLight.attentuation = 0.2f;
 	physics.addFloor(racetrack_model);
 
@@ -54,6 +56,7 @@ void App::preFrame(double frameTime, double totalTime)
 	fps = int(1 / timeFctr);
 	clock_start = clock();
 	physics.updateCar(timeFctr);
+
 	//camera
 	/*if (upArrow.getData() == ON)
 		camera->updateSpeed();
@@ -65,34 +68,38 @@ void App::preFrame(double frameTime, double totalTime)
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_COLOR_MATERIAL);
+
 	//bind fbo
 	//glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboId);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//fbo.endShader->use();
 	//glBindTexture(GL_TEXTURE_2D, fbo.fboTextureId);
 	//glUniform1i(fbo.endShader->getUniformLocation("s_texture"), 0);
 	//glEnableVertexAttribArray(1);
 	//glBindBuffer(GL_ARRAY_BUFFER, fbo.vbo_fbo_vertices);
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_COLOR_MATERIAL);
 	
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
 	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
 	//glMultMatrixf(glm::value_ptr(carmvp));
 
+	// Devices
+	glm::mat4 headData = headDevice.getData();
+	glm::mat4 cameraData = cameraDevice.getData();
+	glm::mat4 viewMatrix = modelViewMatrix * headData;
+
 	// Update the uniform time variable.
 	GLfloat time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
 
 	// Mvp
-	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	glm::mat4 mvpCube = glm::translate(mvp, glm::vec3(-150.0f, -100.0f, 150.0f));
+	glm::mat4 mvp = projectionMatrix * viewMatrix; // glm::mat4 mvp = projectionMatrix * modelViewMatrix;
 
 	// Cube Model (Air)
 	airnoiseShader->use();
 	airnoiseShader->setUniformFloat("time", time);
-	airnoiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvpCube);
+	airnoiseShader->setUniformMatrix4("modelViewProjectionMatrix", glm::translate(mvp, glm::vec3(-150.0f, -100.0f, 150.0f)));
 	cube_model->draw(airnoiseShader);
 
 	// Checkers Model
@@ -104,7 +111,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	simpleShader->setUniformFloat("light.ambientCoefficient", pointLight.ambientCoefficient);
 	simpleShader->setUniformFloat("time", time);
 	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	simpleShader->setUniformVec3("cameraPosition", glm::vec3(0.0f, 0.0f, 10.0f));
+	simpleShader->setUniformVec3("cameraPosition", extractCameraPosition(mvp));
 	simpleShader->setUniformFloat("materialShininess", 5.0f);
 	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	checkers_model->draw(simpleShader);
@@ -124,7 +131,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformFloat("light.ambientCoefficient", pointLight.ambientCoefficient);
 	noiseShader->setUniformFloat("time", time);
 	noiseShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	noiseShader->setUniformVec3("cameraPosition", glm::vec3(0.0f, 0.0f, 10.0f));
+	noiseShader->setUniformVec3("cameraPosition", extractCameraPosition(mvp));
 	noiseShader->setUniformFloat("materialShininess", 5.0f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
@@ -134,6 +141,14 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	//DrawWireFrame();
 
 	glDisable(GL_DEPTH_TEST);
-	DrawAxii();
-	DrawPoint(pointLight.position);
+	//DrawAxii();
+	//DrawPoint(pointLight.position);
+}
+
+// No Scaling
+glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView)
+{
+	glm::mat3 rotMat = glm::mat3(modelView);
+	glm::vec3 d(modelView[3]);
+	return -d * rotMat;
 }

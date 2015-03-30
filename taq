@@ -1,0 +1,74 @@
+[1mdiff --git a/App.cpp b/App.cpp[m
+[1mindex e00ddb8..6f207b5 100644[m
+[1m--- a/App.cpp[m
+[1m+++ b/App.cpp[m
+[36m@@ -7,9 +7,10 @@[m
+ #include <glm/gtc/type_ptr.hpp>[m
+ #include <functional>[m
+ [m
+[31m-App::App(WiiMoteWrapper* w)[m
+[32m+[m[32mApp::App(WiiMoteWrapper* w, Kernel *k)[m
+ {[m
+ 	wiiMoteWrapper = w; [m
+[32m+[m	[32mkernel = k;[m
+ }[m
+ App::~App(void){[m
+ 	fbo.~FrameBufferObject();[m
+[36m@@ -23,11 +24,12 @@[m [mvoid App::init(void)[m
+ 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));[m
+ 	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));[m
+ 	camera = new Camera();[m
+[32m+[m	[32mphysics.addFloor(racetrack_model);[m
+[32m+[m
+ 	pointLight.position = glm::vec3(-30.0f, 5.0f, 40.0f);[m
+ 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);[m
+[31m-	pointLight.ambientCoefficient = 0.8f;[m
+[32m+[m	[32mpointLight.ambientCoefficient = 0.9f;[m
+ 	pointLight.attentuation = 0.2f;[m
+[31m-	physics.addFloor(racetrack_model);[m
+ [m
+ 	simpleShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");[m
+ 	simpleShader->link();[m
+[36m@@ -41,6 +43,8 @@[m [mvoid App::init(void)[m
+ 	airnoiseShader->link();[m
+ 	airnoiseShader->setUniformInt("s_texture", 0);[m
+ [m
+[32m+[m	[32mkernel->[m
+[32m+[m
+ 	glEnable(GL_DEPTH_TEST);[m
+ 	glEnable(GL_CULL_FACE);[m
+ }[m
+[1mdiff --git a/App.h b/App.h[m
+[1mindex eed1e66..7a42664 100644[m
+[1m--- a/App.h[m
+[1m+++ b/App.h[m
+[36m@@ -28,6 +28,7 @@[m [mclass App : public Application[m
+ 		};[m
+ 		//PositionalDevice wand;[m
+ 		//PositionalDevice head;[m
+[32m+[m		[32mKernel * kernel;[m
+ 		DigitalDevice leftButton;[m
+ 		DigitalDevice upArrow, downArrow, leftArrow, rightArrow;[m
+ 		cModel* cube_model,* checkers_model,* racetrack_model;[m
+[36m@@ -41,7 +42,7 @@[m [mclass App : public Application[m
+ 		FrameBufferObject fbo;[m
+ [m
+ 	public:[m
+[31m-		App(WiiMoteWrapper * w);[m
+[32m+[m		[32mApp(WiiMoteWrapper*, Kernel*);[m
+ 		~App(void);[m
+ 		[m
+ 		void init();[m
+[1mdiff --git a/main.cpp b/main.cpp[m
+[1mindex 946a63f..5aaae8d 100644[m
+[1m--- a/main.cpp[m
+[1m+++ b/main.cpp[m
+[36m@@ -10,7 +10,7 @@[m [mint main(int argc, char* argv[])[m
+ {[m
+ 	Kernel* kernel = Kernel::getInstance();  // Get the kernel[m
+ 	WiiMoteWrapper w;[m
+[31m-	App* app = new App(&w);             // Instantiate an instance of the app	[m
+[32m+[m	[32mApp* app = new App(&w, kernel);             // Instantiate an instance of the app[m[41m	[m
+ 	// Load any config files specified on the command line		[m
+ 	thread t([&](WiiMoteWrapper * w2){ w2->start(); },&w);[m
+ 	for (int i = 1; i < argc; ++i)[m
