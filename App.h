@@ -7,29 +7,34 @@
 #include <CaveLib\Shader.h>
 #include <GL\glew.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <ctime>
+#include <iostream>
 
 #include "WiiYourself/WiiMoteWrapper.h"
-#include <ctime>
 #include "Camera.h"
 #include "Physics.h"
 #include "DebugFunctions.h"
 
 class App : public Application
 {
-	private:		
+	private:	
+		struct Light
+		{
+			glm::vec3 position;
+			glm::vec3 intensities; //a.k.a. the color of the light
+		};
 		//PositionalDevice wand;
 		//PositionalDevice head;
 		DigitalDevice leftButton;
 		DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
-		cModel* checkers_model,* racetrack_model;
+		cModel* cube_model,* checkers_model,* racetrack_model;
 		WiiMoteWrapper * wiiMoteWrapper;
 		Camera* camera;
 		GLint fps;
 		clock_t clock_start = clock();
 		Physics physics;
-		ShaderProgram *simpleShader, *noiseShader;
-
-		void drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time);
+		ShaderProgram *simpleShader, *noiseShader, *airnoiseShader;
+		Light pointLight;
 
 	public:
 		App(WiiMoteWrapper * w);
