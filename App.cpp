@@ -105,7 +105,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	simpleShader->setUniformFloat("time", time);
 	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	simpleShader->setUniformVec3("cameraPosition", glm::vec3(0.0f, 0.0f, 10.0f));
-	simpleShader->setUniformFloat("materialShininess", 0.2f);
+	simpleShader->setUniformFloat("materialShininess", 5.0f);
 	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	checkers_model->draw(simpleShader);
 
@@ -125,7 +125,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformFloat("time", time);
 	noiseShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	noiseShader->setUniformVec3("cameraPosition", glm::vec3(0.0f, 0.0f, 10.0f));
-	noiseShader->setUniformFloat("materialShininess", 0.5f);
+	noiseShader->setUniformFloat("materialShininess", 5.0f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
 
