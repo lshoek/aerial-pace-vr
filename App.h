@@ -14,7 +14,6 @@
 #include "Camera.h"
 #include "Physics.h"
 #include "DebugFunctions.h"
-#include "frameBufferObject.h"
 
 
 namespace blib { class Texture; class Font; class StaticModel; }
@@ -26,6 +25,8 @@ class App : public Application
 		{
 			glm::vec3 position;
 			glm::vec3 intensities; //a.k.a. the color of the light
+			float ambientCoefficient;
+			float attentuation;
 		};
 		//PositionalDevice wand;
 		//PositionalDevice head;

@@ -14,7 +14,6 @@
     <ClCompile Include="WiiYourself\WiiMoteWrapper.cpp">
       <Filter>WiiYourself</Filter>
     </ClCompile>
-    <ClCompile Include="frameBufferObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -36,7 +35,6 @@
       <Filter>WiiYourself</Filter>
     </ClInclude>
     <ClInclude Include="DebugFunctions.h" />
-    <ClInclude Include="frameBufferObject.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="WiiYourself">
