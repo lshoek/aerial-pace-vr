@@ -15,39 +15,41 @@ App::~App(void){
 	//fbo.~FrameBufferObject();
 }
 
+
 void App::init(void)
 {
-	upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
+	//upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
 	physics.bullet3Init(wiiMoteWrapper);
+	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
+	sun_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));
 	
 	physics.addFloor(racetrack_model);
 
 	camera = new Camera();
+	pointLight.position = glm::vec3(-20.0f, 8.0f, -10.0f);
+	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	simpleShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");
-	simpleShader->bindAttributeLocation("a_position", 0);
-	simpleShader->bindAttributeLocation("a_normal", 1);
-	simpleShader->bindAttributeLocation("a_texCoord", 2);
 	simpleShader->link();
 	simpleShader->setUniformInt("s_texture", 0);
 
-	noiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/perlinnoise.frag");
-	noiseShader->bindAttributeLocation("a_position", 0);
-	noiseShader->bindAttributeLocation("a_normal", 1);
-	noiseShader->bindAttributeLocation("a_texCoord", 2);
+	noiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/perlinnoise.vert", "data/aerial-pace-vr/shaders/perlinnoise.frag");
 	noiseShader->link();
 	noiseShader->setUniformInt("s_texture", 0);
 
 	sunShader = new ShaderProgram("data/aerial-pace-vr/shaders/sunshader.vert", "data/aerial-pace-vr/shaders/sunshader.frag");
-	sunShader->bindAttributeLocation("a_position", 0);
-	sunShader->bindAttributeLocation("a_normal", 1);
 	sunShader->link();
 
 	//fbo.endShader = new ShaderProgram("data/aerial-pace-vr/shaders/motionblur.vert", "data/aerial-pace-vr/shaders/motionblur.frag");
 	//fbo.endShader->link();
 	//fbo.initFBO();
+
+	airnoiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/airnoise.vert", "data/aerial-pace-vr/shaders/airnoise.frag");
+	airnoiseShader->link();
+	airnoiseShader->setUniformInt("s_texture", 0);
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 }
@@ -95,51 +97,63 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	glm::mat3 normalMatrix = glm::mat3(0.5f);
-	// Simple Shader
-	simpleShader->use();
+	glm::mat4 mvpCube = glm::translate(mvp, glm::vec3(-150.0f, -100.0f, 150.0f));
+
+	// Cube Model (Air)
+	airnoiseShader->use();
+	airnoiseShader->setUniformFloat("time", time);
+	airnoiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvpCube);
+	cube_model->draw(airnoiseShader);
+	btVector3 carTranslation = physics.realCar->getWorldTransform().getOrigin();
+	glm::vec3 glmCarTranslation(carTranslation.x(), -2, carTranslation.z());
+	// Checkers Model
+	/*simpleShader->use();
+	simpleShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
+	simpleShader->setUniformVec3("light.position", pointLight.position);
+	simpleShader->setUniformVec3("light.intensities", pointLight.intensities);
 	simpleShader->setUniformFloat("time", time);
-	noiseShader->setUniformVec4("lightPosition", glm::vec4(10.0f, 10.0f, 10.0f, 1.0f));
-	noiseShader->setUniformVec3("diffuseReflectivity", glm::vec3(1.0f));
-	noiseShader->setUniformVec3("lightSourceIntensity", glm::vec3(1.5f));
-	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
-	//noiseShader->setUniformMatrix3("normalMatrix", normalMatrix);
-	noiseShader->setUniformMatrix4("projectionMatrix", projectionMatrix);
+	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
+	
+	simpleShader->setUniformVec3("cameraPosition", glmCarTranslation);
+	simpleShader->setUniformFloat("materialShininess", 0.5f);
 	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
-	checkers_model->draw(simpleShader);
+	checkers_model->draw(simpleShader);*/
 
-	// Noise Shader
-	drawStage(projectionMatrix * modelViewMatrix, physics.realCar->getWorldTransform().getOrigin(), 180, time);
-	DrawWireFrame();
-
-
-	/*fbo.endShader->use();
-	glEnableVertexAttribArray(1);							// en vertex attribute 1
-	glEnableVertexAttribArray(2);							// en vertex attribute 2 ook
-	glEnableVertexAttribArray(3);							// en vertex attribute 3 ook
-	glUniform1i(fbo.endShader->getUniformLocation("s_texture"), 0);
+	sunShader->use();
+	sunShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
+	sunShader->setUniformFloat("time", time);
+	sunShader->setUniformVec3("cameraPosition", glmCarTranslation);
+	float scale = 0.01f;
+	glm::mat4 sunMat4 = mvp;
+	sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
+	sunMat4 = glm::translate(sunMat4,pointLight.position);
+	sunShader->setUniformMatrix4("modelViewProjectionMatrix", sunMat4);
+	sun_model->draw(sunShader);
 	
-	glBindTexture(GL_TEXTURE_2D, fbo.fboTextureId);
-	glDisableVertexAttribArray(1);							// disable vertex attribute 1
-	glDisableVertexAttribArray(2);							// en vertex attribute 2 ook
-	glDisableVertexAttribArray(3);							// en vertex attribute 3 ook
-	glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &fbo.vbo_fbo_vertices);									//geef aan dat de posities op deze locatie zitten
-	glDrawArrays(GL_QUADS, 0, fbo.vbo_fbo_vertices);*/
-}
-
-void App::drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time){
-	glm::mat4 mvp = mvp1;	
-	//mvp = glm::rotate(mvp, rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-	mvp = glm::translate(mvp, glm::vec3(translation.x(), translation.y()*0-2, translation.z()));
+	GLfloat carRotation = 180.0f;
+	mvp = glm::rotate(mvp, carRotation, glm::vec3(0.0f, 1.0f, 0.0f));
+	mvp = glm::translate(mvp, glmCarTranslation);
 	
+	// Racetrack
 	noiseShader->use();
+	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
+	noiseShader->setUniformVec3("light.position", pointLight.position);
+	noiseShader->setUniformVec3("light.intensities", pointLight.intensities);
 	noiseShader->setUniformFloat("time", time);
-	noiseShader->setUniformVec4("lightPosition", glm::vec4(10.0f, 10.0f, 10.0f, 1.0f));
-	noiseShader->setUniformVec3("diffuseReflectivity", glm::vec3(1.0f));
-	noiseShader->setUniformVec3("lightSourceIntensity", glm::vec3(1.5f));
-	//noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
-	//noiseShader->setUniformMatrix3("normalMatrix", normalMatrix);
-	//noiseShader->setUniformMatrix4("projectionMatrix", projectionMatrix);
+	noiseShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
+	
+	noiseShader->setUniformVec3("cameraPosition", glmCarTranslation);
+	noiseShader->setUniformFloat("materialShininess", 0.5f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
-	racetrack_model->draw(noiseShader);
+	racetrack_model->draw(noiseShader);	
+	//DrawPoint(pointLight.position);
+
+	// Etc
+	glUseProgram(0);
+	//DrawWireFrame();
+
+	glDisable(GL_DEPTH_TEST);
+	//DrawAxii();
+	
 }
+

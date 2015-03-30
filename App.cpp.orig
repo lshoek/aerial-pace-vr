@@ -4,29 +4,37 @@
 #include <Windows.h>
 #include <CaveLib\model.h>
 #include "App.h"
+#include <glm/gtc/type_ptr.hpp>
+
+const string App::SHADERLOCATION = "data/aerial-pace-vr/shaders/";
 
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w; 
-	car.initCar(w, &physics);
 }
 App::~App(void){}
 
 void App::init(void)
 {
-	//classicFont = new Font("data/aerial-pace-vr/fonts/classicfnt32.fnt", "data/aerial-pace-vr/fonts/classicfnt32.png");
 	upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
-	physics.bullet3Init();
-	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
+	physics.bullet3Init(wiiMoteWrapper);
+	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
+	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));
 	camera = new Camera();
 
-	caveShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");
-	caveShader->bindAttributeLocation("a_position", 0);
-	caveShader->bindAttributeLocation("a_normal", 1);
-	caveShader->bindAttributeLocation("a_texcoord", 2);
-	caveShader->link();
-	caveShader->use();
-	caveShader->setUniformInt("s_texture", 0);
+	simpleShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");
+	simpleShader->bindAttributeLocation("a_position", 0);
+	simpleShader->bindAttributeLocation("a_normal", 1);
+	simpleShader->bindAttributeLocation("a_texCoord", 2);
+	simpleShader->link();
+	simpleShader->setUniformInt("s_texture", 0);
+
+	noiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/perlinnoise.frag");
+	noiseShader->bindAttributeLocation("a_position", 0);
+	noiseShader->bindAttributeLocation("a_normal", 1);
+	noiseShader->bindAttributeLocation("a_texCoord", 2);
+	noiseShader->link();
+	noiseShader->setUniformInt("s_texture", 0);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -40,65 +48,80 @@ void App::preFrame(double frameTime, double totalTime)
 	camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
-
-	//car
-	car.updateCar(timeFctr);
-	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	
+	physics.updateCar(timeFctr);
 	//camera
-	if (upArrow.getData() == ON)
+	/*if (upArrow.getData() == ON)
 		camera->updateSpeed();
 	if (leftArrow.getData() == ON)
 		camera->rotateCamYaw(-1.0f);
 	else if (rightArrow.getData() == ON)
-		camera->rotateCamYaw(1.0f);
+		camera->rotateCamYaw(1.0f);*/
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
-<<<<<<< HEAD
 	glEnable(GL_COLOR_MATERIAL);
 
-	// camera
-	//camera->refresh();
-
-	// physics
-=======
-	glEnable(GL_COLOR_MATERIAL);	
-	checkers_model->draw();
-	glPushMatrix();
-	camera->refresh();
-	
->>>>>>> 4445fa04530981080460ef123d79159421419f29
-	btVector3 b = physics.realCar->getWorldTransform().getOrigin();
-	float angle = physics.realCar->getOrientation().getAngle();
+	float mvpRaw[16];
+	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
+	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
 <<<<<<< HEAD
-	glRotatef(car.carRadians, 0, 1, 0);
 
-	// shader
+	glMultMatrixf(glm::value_ptr(carmvp));
+=======
+	//glMultMatrixf(glm::value_ptr(carmvp));
+>>>>>>> 35f86797048c71a42457512b3e297d425ae5f45a
+
+	// Update the uniform time variable.
+	GLfloat time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
+
+	// Mvp
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	caveShader->use();
-	caveShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
-	checkers_model->draw(caveShader);
+	glm::mat3 normalMatrix = glm::mat3(0.5f);
+	// Simple Shader
+	simpleShader->use();
+	simpleShader->setUniformFloat("time", time);
+	noiseShader->setUniformVec4("lightPosition", glm::vec4(10.0f, 10.0f, 10.0f, 1.0f));
+	noiseShader->setUniformVec3("diffuseReflectivity", glm::vec3(1.0f));
+	noiseShader->setUniformVec3("lightSourceIntensity", glm::vec3(1.5f));
+	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
+	//noiseShader->setUniformMatrix3("normalMatrix", normalMatrix);
+	noiseShader->setUniformMatrix4("projectionMatrix", projectionMatrix);
+	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
+	checkers_model->draw(simpleShader);
+
+	// Noise Shader
+<<<<<<< HEAD
+	mvp = glm::rotate(mvp, 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	mvp = glm::translate(mvp, glm::vec3(0.0f, -2.0f, 0.0f));
+	noiseShader->use();
+	noiseShader->setUniformFloat("time", time);
+	noiseShader->setUniformVec4("lightPosition", glm::vec4(10.0f, 10.0f, 10.0f, 1.0f));
+	noiseShader->setUniformVec3("diffuseReflectivity", glm::vec3(1.0f));
+	noiseShader->setUniformVec3("lightSourceIntensity", glm::vec3(1.5f));
+	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
+	//noiseShader->setUniformMatrix3("normalMatrix", normalMatrix);
+	noiseShader->setUniformMatrix4("projectionMatrix", projectionMatrix);
+	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
+	racetrack_model->draw(noiseShader);
+=======
+	drawStage(projectionMatrix * modelViewMatrix, physics.realCar->getWorldTransform().getOrigin(), M_PI + 0, time);
+>>>>>>> 35f86797048c71a42457512b3e297d425ae5f45a
 	glUseProgram(0);
 
-	// etc
-=======
-	glTranslatef(b.x(), 0, b.z());
+	// Etc
 	DrawWireFrame();
-	//glRotatef(car.carRadians, 0, 1, 0);	
-	for each (btRigidBody* floor in physics.floorParts)
-	{
-		btVector3 b = floor->getWorldTransform().getOrigin();
-		glPushMatrix();
-		glTranslatef(b.x(), b.y(), b.z());
-		glColor3f(0.3, 0.5, 0.7);
-		DrawWireFrame();
-		glPopMatrix();
-	}
->>>>>>> 4445fa04530981080460ef123d79159421419f29
-	//classicFont->drawText("HELLO WORLD!", 10.0f, 10.0f, 0.0f);
+}
+
+void App::drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time){
+	glm::mat4 mvp = mvp1;	
+	mvp = glm::rotate(mvp, rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+	mvp = glm::translate(mvp, glm::vec3(translation.x(), translation.y() - 2.0f, translation.z()));
 	
+	noiseShader->use();
+	noiseShader->setUniformFloat("time", time);
+	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
+	racetrack_model->draw(noiseShader);
 }
