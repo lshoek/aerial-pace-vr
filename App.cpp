@@ -5,6 +5,7 @@
 #include <CaveLib\model.h>
 #include "App.h"
 #include <glm/gtc/type_ptr.hpp>
+#include <functional>
 
 App::App(WiiMoteWrapper* w)
 {
@@ -20,6 +21,9 @@ void App::init(void)
 	physics.bullet3Init(wiiMoteWrapper);
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));
+	
+	physics.addFloor(racetrack_model);
+
 	camera = new Camera();
 
 	simpleShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");
@@ -101,7 +105,6 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Noise Shader
 	drawStage(projectionMatrix * modelViewMatrix, physics.realCar->getWorldTransform().getOrigin(), 180, time);
-
 	DrawWireFrame();
 
 
@@ -110,7 +113,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glEnableVertexAttribArray(2);							// en vertex attribute 2 ook
 	glEnableVertexAttribArray(3);							// en vertex attribute 3 ook
 	glUniform1i(fbo.endShader->getUniformLocation("s_texture"), 0);
-
+	
 	glBindTexture(GL_TEXTURE_2D, fbo.fboTextureId);
 	glDisableVertexAttribArray(1);							// disable vertex attribute 1
 	glDisableVertexAttribArray(2);							// en vertex attribute 2 ook
@@ -122,7 +125,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 void App::drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time){
 	glm::mat4 mvp = mvp1;	
 	//mvp = glm::rotate(mvp, rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-	mvp = glm::translate(mvp, glm::vec3(translation.x(), translation.y() - 2.0f, translation.z()));
+	mvp = glm::translate(mvp, glm::vec3(translation.x(), translation.y()*0-2, translation.z()));
 	
 	noiseShader->use();
 	noiseShader->setUniformFloat("time", time);
