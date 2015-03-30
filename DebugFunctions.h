@@ -26,7 +26,7 @@ inline void DrawPoint(glm::vec3 pos)
 {
 	glPushMatrix();
 	glPointSize(10.0);
-	//glColor3f(0.0f, 1.0f, 0.0f);
+	glColor3f(0.0f, 1.0f, 0.0f);
 	glBegin(GL_POINTS);
 	glVertex3f(pos.x, pos.y, pos.z);
 	glEnd();
