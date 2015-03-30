@@ -5,14 +5,15 @@
 #include <CaveLib\model.h>
 #include "App.h"
 #include <glm/gtc/type_ptr.hpp>
-
-const string App::SHADERLOCATION = "data/aerial-pace-vr/shaders/";
+#include <functional>
 
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w; 
 }
-App::~App(void){}
+App::~App(void){
+	fbo.~FrameBufferObject();
+}
 
 void App::init(void)
 {
@@ -21,6 +22,9 @@ void App::init(void)
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));
+	
+	physics.addFloor(racetrack_model);
+
 	camera = new Camera();
 	pointLight.position = glm::vec3(-20.0f, 8.0f, -10.0f);
 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -61,9 +65,18 @@ void App::preFrame(double frameTime, double totalTime)
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
+	//bind fbo
+	//glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboId);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//fbo.endShader->use();
+	//glBindTexture(GL_TEXTURE_2D, fbo.fboTextureId);
+	//glUniform1i(fbo.endShader->getUniformLocation("s_texture"), 0);
+	//glEnableVertexAttribArray(1);
+	//glBindBuffer(GL_ARRAY_BUFFER, fbo.vbo_fbo_vertices);
+
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
+	
 
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);

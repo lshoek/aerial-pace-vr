@@ -19,6 +19,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include <CaveLib\model.h>
 #include "WiiYourself\WiiMoteWrapper.h"
 
 
@@ -35,14 +36,16 @@ public:
 	btCollisionDispatcher*                  dispatcher;
 	btSequentialImpulseConstraintSolver*    solver;
 	btDiscreteDynamicsWorld*                world;
+	btBvhTriangleMeshShape*					levelShape;
+	btCollisionObject *						level;
+	btRigidBody *							realCar;
 
 	int Physics::bullet3Init(WiiMoteWrapper* w);
 	void addCar();
-	void addFloor(const btVector3 &size, const btVector3 &origin);
+	void addFloor(cModel* stage);
 	void updateCar(float timeFactor);
 
-	btRigidBody * realCar;
-	vector<btRigidBody *> floorParts;
+	
 	static const float MAXFORCE;
 	WiiMoteWrapper * wiiMoteWrapper;
 };
