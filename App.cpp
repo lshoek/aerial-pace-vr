@@ -22,12 +22,12 @@ void App::init(void)
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));
-	
-	physics.addFloor(racetrack_model);
-
 	camera = new Camera();
-	pointLight.position = glm::vec3(-20.0f, 8.0f, -10.0f);
+	pointLight.position = glm::vec3(-30.0f, 5.0f, 40.0f);
 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
+	pointLight.ambientCoefficient = 0.8f;
+	pointLight.attentuation = 0.2f;
+	physics.addFloor(racetrack_model);
 
 	simpleShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");
 	simpleShader->link();
@@ -77,7 +77,6 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
 	
-
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
 	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
@@ -101,12 +100,12 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	simpleShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	simpleShader->setUniformVec3("light.position", pointLight.position);
 	simpleShader->setUniformVec3("light.intensities", pointLight.intensities);
+	simpleShader->setUniformFloat("light.attenuation", pointLight.attentuation);
+	simpleShader->setUniformFloat("light.ambientCoefficient", pointLight.ambientCoefficient);
 	simpleShader->setUniformFloat("time", time);
 	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	simpleShader->setUniformVec3("cameraPosition", glm::vec3(physics.realCar->getWorldTransform().getOrigin().x(),
-		physics.realCar->getWorldTransform().getOrigin().y(),
-		physics.realCar->getWorldTransform().getOrigin().z()));
-	simpleShader->setUniformFloat("materialShininess", 0.5f);
+	simpleShader->setUniformVec3("cameraPosition", glm::vec3(0.0f, 0.0f, 10.0f));
+	simpleShader->setUniformFloat("materialShininess", 0.2f);
 	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	checkers_model->draw(simpleShader);
 
@@ -121,11 +120,11 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	noiseShader->setUniformVec3("light.position", pointLight.position);
 	noiseShader->setUniformVec3("light.intensities", pointLight.intensities);
+	noiseShader->setUniformFloat("light.attenuation", pointLight.attentuation);
+	noiseShader->setUniformFloat("light.ambientCoefficient", pointLight.ambientCoefficient);
 	noiseShader->setUniformFloat("time", time);
 	noiseShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	noiseShader->setUniformVec3("cameraPosition", glm::vec3(physics.realCar->getWorldTransform().getOrigin().x(),
-		physics.realCar->getWorldTransform().getOrigin().y(),
-		physics.realCar->getWorldTransform().getOrigin().z()));
+	noiseShader->setUniformVec3("cameraPosition", glm::vec3(0.0f, 0.0f, 10.0f));
 	noiseShader->setUniformFloat("materialShininess", 0.5f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);

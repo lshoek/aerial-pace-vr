@@ -23,8 +23,6 @@ class App : public Application
 		{
 			glm::vec3 position;
 			glm::vec3 intensities; //a.k.a. the color of the light
-			float ambientCoefficient;
-			float attentuation;
 		};
 		//PositionalDevice wand;
 		//PositionalDevice head;
@@ -36,9 +34,15 @@ class App : public Application
 		GLint fps;
 		clock_t clock_start = clock();
 		Physics physics;
+<<<<<<< HEAD
 		ShaderProgram *simpleShader, *noiseShader, *airnoiseShader;
 		Light pointLight;
+=======
+		ShaderProgram *simpleShader, *noiseShader;
 		FrameBufferObject fbo;
+
+		void drawStage(const glm::mat4 &mvp1, const btVector3 &translation, float rotation, GLfloat time);
+>>>>>>> 350391ae6e6485839a792595081f21c67c3bb4c8
 
 	public:
 		App(WiiMoteWrapper * w);
