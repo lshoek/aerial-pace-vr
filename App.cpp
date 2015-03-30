@@ -12,7 +12,7 @@ App::App(WiiMoteWrapper* w)
 	wiiMoteWrapper = w; 
 }
 App::~App(void){
-	fbo.~FrameBufferObject();
+	//fbo.~FrameBufferObject();
 }
 
 void App::init(void)
@@ -40,9 +40,14 @@ void App::init(void)
 	noiseShader->link();
 	noiseShader->setUniformInt("s_texture", 0);
 
-	fbo.endShader = new ShaderProgram("data/aerial-pace-vr/shaders/motionblur.vert", "data/aerial-pace-vr/shaders/motionblur.frag");
-	fbo.endShader->link();
-	fbo.initFBO();
+	sunShader = new ShaderProgram("data/aerial-pace-vr/shaders/sunshader.vert", "data/aerial-pace-vr/shaders/sunshader.frag");
+	sunShader->bindAttributeLocation("a_position", 0);
+	sunShader->bindAttributeLocation("a_normal", 1);
+	sunShader->link();
+
+	//fbo.endShader = new ShaderProgram("data/aerial-pace-vr/shaders/motionblur.vert", "data/aerial-pace-vr/shaders/motionblur.frag");
+	//fbo.endShader->link();
+	//fbo.initFBO();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 }

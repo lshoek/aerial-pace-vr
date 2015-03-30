@@ -100,5 +100,5 @@ void Physics::updateCar(float timeFactor){
 	world->stepSimulation(timeFactor);//en updaten
 	btVector3 b2 = realCar->getWorldTransform().getOrigin();
 	
-	printf("auto %f,%f,%f :%f rad %d\n", b2.x(), b2.y(), b2.z(), rotationFactor, realCar->getCollisionFlags());
+	//printf("auto %f,%f,%f :%f rad %d\n", b2.x(), b2.y(), b2.z(), rotationFactor, realCar->getCollisionFlags());
 }
