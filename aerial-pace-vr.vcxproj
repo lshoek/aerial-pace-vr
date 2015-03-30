@@ -94,7 +94,6 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="frameBufferObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="WiiYourself\WiiLib.cpp" />
@@ -105,7 +104,6 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DebugFunctions.h" />
-    <ClInclude Include="frameBufferObject.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="WiiYourself\WiiLib.h" />
     <ClInclude Include="WiiYourself\wiimote.h" />
