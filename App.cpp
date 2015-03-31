@@ -18,6 +18,9 @@ App::~App(void){
 
 void App::init(void)
 {
+	m_pDebugDrawer = new DebugDrawer();
+	m_pDebugDrawer->setDebugMode(3);
+	
 	//upArrow.init("UpArrow"); downArrow.init("DownArrow"); leftArrow.init("LeftArrow"); rightArrow.init("RightArrow");
 	physics.bullet3Init(wiiMoteWrapper);
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
@@ -48,6 +51,7 @@ void App::init(void)
 	airnoiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/airnoise.vert", "data/aerial-pace-vr/shaders/airnoise.frag");
 	airnoiseShader->link();
 	airnoiseShader->setUniformInt("s_texture", 0);
+	physics.world->setDebugDrawer(m_pDebugDrawer);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -61,6 +65,32 @@ void App::preFrame(double frameTime, double totalTime)
 	camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
+	//Check I
+	if (GetAsyncKeyState(73) != 0)
+	{
+		wiiMoteWrapper->buttonOne = true;
+	}
+	else
+		wiiMoteWrapper->buttonOne = false;
+	//Check J
+	if (GetAsyncKeyState(74) != 0)
+	{
+		wiiMoteWrapper->degrees = -30;
+	}
+	//Check K
+	if (GetAsyncKeyState(75) != 0)
+	{
+		wiiMoteWrapper->buttonTwo = true;		
+	}
+	else
+		wiiMoteWrapper->buttonTwo = false;
+	//Check L
+	if (GetAsyncKeyState(76) != 0)
+	{
+		wiiMoteWrapper->degrees =30;
+	}
+	if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
+		wiiMoteWrapper->degrees = 0;
 	physics.updateCar(timeFctr);
 	//camera
 	/*if (upArrow.getData() == ON)
@@ -73,6 +103,7 @@ void App::preFrame(double frameTime, double totalTime)
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
+	physics.world->debugDrawWorld();
 	//bind fbo
 	//glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboId);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -103,7 +134,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	airnoiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvpCube);
 	cube_model->draw(airnoiseShader);
 	btVector3 carTranslation = physics.realCar->getWorldTransform().getOrigin();
-	glm::vec3 glmCarTranslation(carTranslation.x(), -2, carTranslation.z());
+	glm::vec3 cameraPosition(0, 0, 10.0f);
+	glm::vec3 glmCarTranslation(carTranslation.x(), carTranslation.y()-2, carTranslation.z());
+	cameraPosition += glmCarTranslation;
 	// Checkers Model
 	simpleShader->use();
 	simpleShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
@@ -114,15 +147,15 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	simpleShader->setUniformFloat("time", time);
 	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	
-	simpleShader->setUniformVec3("cameraPosition", glm::vec3(0.0f, 0.0f, 10.0f));
+	simpleShader->setUniformVec3("cameraPosition", cameraPosition);
 	simpleShader->setUniformFloat("materialShininess", 5.0f);
 	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
-	checkers_model->draw(simpleShader);
+	//checkers_model->draw(simpleShader);
 
 	sunShader->use();
 	sunShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	sunShader->setUniformFloat("time", time);
-	sunShader->setUniformVec3("cameraPosition", glmCarTranslation);
+	sunShader->setUniformVec3("cameraPosition", cameraPosition);
 	float scale = 0.01f;
 	glm::mat4 sunMat4 = mvp;
 	//sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
@@ -130,9 +163,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	sunShader->setUniformMatrix4("modelViewProjectionMatrix", sunMat4);
 	sun_model->draw(sunShader);
 	
-	GLfloat carRotation = 180.0f;
-	mvp = glm::rotate(mvp, carRotation, glm::vec3(0.0f, 1.0f, 0.0f));
-	mvp = glm::translate(mvp, glmCarTranslation);
+	GLfloat carRotation = M_PI;
+	//mvp = glm::rotate(mvp, carRotation, glm::vec3(0,1,0));
+	mvp = glm::translate(mvp, cameraPosition);
 		
 	// Racetrack
 	noiseShader->use();
@@ -143,10 +176,11 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformFloat("light.ambientCoefficient", pointLight.ambientCoefficient);
 	noiseShader->setUniformFloat("time", time);
 	noiseShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	noiseShader->setUniformVec3("cameraPosition", glm::vec3(0.0f, 0.0f, 10.0f));
+	noiseShader->setUniformVec3("cameraPosition", cameraPosition);
 	noiseShader->setUniformFloat("materialShininess", 5.0f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
+	checkers_model->draw(sunShader);
 
 	// Etc
 	glUseProgram(0);
