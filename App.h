@@ -29,9 +29,7 @@ class App : public Application
 			float ambientCoefficient;
 			float attentuation;
 		};
-		//PositionalDevice wand;
-		//PositionalDevice head;
-		DigitalDevice leftButton;
+		PositionalDevice headDevice, cameraDevice;
 		DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
 		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
 		WiiMoteWrapper * wiiMoteWrapper;
@@ -51,4 +49,6 @@ class App : public Application
 		void init();
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
+
+		glm::vec3 extractCameraPosition(const glm::mat4 &modelView);
 };
