@@ -1,7 +1,7 @@
 #include "Physics.h"
 #include <functional>
 
-const float Physics::MAXFORCE = 50.0f;
+const float Physics::MAXFORCE = 300.0f;
 
 Physics::Physics()
 {
@@ -65,6 +65,10 @@ void Physics::addFloor(cModel* stage){
 }
 
 void Physics::addCar(){
+	if (!realCar){
+		world->removeRigidBody(realCar);
+		delete realCar;
+	}
 	float mass = 1.0f;//kg
 	btVector3 fallInertia;
 	btBoxShape* pBoxShape = new btBoxShape(btVector3(1,1,1));
@@ -74,7 +78,7 @@ void Physics::addCar(){
 	realCar = new btRigidBody(rbInfo);
 	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), btRadians(0));	
 	realCar->getWorldTransform().setRotation(newRotation);
-	realCar->setFriction(0.1);
+	realCar->setFriction(0.2);
 	world->addRigidBody(realCar);
 }
 
@@ -99,5 +103,5 @@ void Physics::updateCar(float timeFactor){
 	realCar->activate();
 	world->stepSimulation(timeFactor);//en updaten
 	btVector3 b2 = realCar->getWorldTransform().getOrigin();
-	printf("auto %f,%f,%f :%f rad %d\n", b2.x(), b2.y(), b2.z(), rotationFactor, realCar->getCollisionFlags());
+	//printf("auto %f,%f,%f :%f rad %d\n", b2.x(), b2.y(), b2.z(), rotationFactor, realCar->getCollisionFlags());
 }

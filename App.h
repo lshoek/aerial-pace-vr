@@ -51,6 +51,7 @@ class App : public Application
 
 		glm::vec3 extractCameraPosition(const glm::mat4 &modelView);
 		GLuint fboID;
-		GLuint *fboTexture;
+		GLuint rboId;
+		GLuint fboTextureID;
 		ShaderProgram *fboShader;
 };

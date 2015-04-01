@@ -48,19 +48,42 @@ void App::init(void)
 	airnoiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/airnoise.vert", "data/aerial-pace-vr/shaders/airnoise.frag");
 	airnoiseShader->link();
 	airnoiseShader->setUniformInt("s_texture", 0);
+
+	fboShader = new ShaderProgram("data/aerial-pace-vr/shaders/postprocess.vert", "data/aerial-pace-vr/shaders/postprocess.frag");
+	fboShader->link();
+	//fboShader->setUniformInt("s_texture", 0);
+
 	physics.world->setDebugDrawer(m_pDebugDrawer);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-
+	return;
 	//fbo
-	glGenFramebuffers(1, &fboID);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID);
-	glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, 512);
-	glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, 512);
-	glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_SAMPLES, 4);
+	glGenTextures(1, &fboID);
+	glBindTexture(GL_TEXTURE_2D, fboTextureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 500, 1200, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
+	glGenFramebuffers(1, &fboID);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
+
+	
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextureID, 0);
+	
+	glGenRenderbuffers(1, &rboId);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 500, 1200);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+
+	GLenum e = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+
+	if (e != GL_FRAMEBUFFER_COMPLETE)
+		printf("There is a problem with the FBO\n");
 }
 
 void App::preFrame(double frameTime, double totalTime)
@@ -71,6 +94,10 @@ void App::preFrame(double frameTime, double totalTime)
 	camera->tf = timeFctr;
 	fps = int(1 / timeFctr);
 	clock_start = clock();
+	if (GetAsyncKeyState(82) != 0){
+		//physics.addCar();
+	}
+
 	//Check I
 	if (GetAsyncKeyState(73) != 0)
 	{
@@ -110,16 +137,19 @@ void App::preFrame(double frameTime, double totalTime)
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
-	physics.world->debugDrawWorld();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
 	
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
-	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
-	//glMultMatrixf(glm::value_ptr(carmvp));
-
+	
+	// Car
+	btVector3 carTranslation = physics.realCar->getWorldTransform().getOrigin();
+	glm::vec3 cameraPosition(0, 0, 10.0f);
+	glm::vec3 glmCarTranslation(-carTranslation.x(), -carTranslation.y() - 2, -carTranslation.z());
+	
 	// Devices
 	glm::mat4 headData = headDevice.getData();
 	glm::mat4 viewMatrix = modelViewMatrix * headData;
@@ -129,15 +159,24 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * viewMatrix; // glm::mat4 mvp = projectionMatrix * modelViewMatrix;
+	mvp = glm::rotate(mvp, -90.0f - physics.realCar->getWorldTransform().getRotation().getAngle(), glm::vec3(0, 1, 0));
+	mvp = glm::translate(mvp, glmCarTranslation);
+	
+
+	// Sun
+	float scale = 0.1f;
+	glm::mat4 sunMat4 = mvp;
+	//
+	sunMat4 = glm::translate(sunMat4, pointLight.position);
+	sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
+	//fbo
+	//glBindFramebuffer(GL_FRAMEBUFFER, fboID);
+	
 	// Cube Model (Air)
 	airnoiseShader->use();
 	airnoiseShader->setUniformFloat("time", time);
 	airnoiseShader->setUniformMatrix4("modelViewProjectionMatrix", glm::translate(mvp, glm::vec3(-150.0f, -100.0f, 150.0f)));
 	cube_model->draw(airnoiseShader);
-	btVector3 carTranslation = physics.realCar->getWorldTransform().getOrigin();
-	glm::vec3 cameraPosition(0, 0, 10.0f);
-	glm::vec3 glmCarTranslation(carTranslation.x(), carTranslation.y()-2, carTranslation.z());
-	cameraPosition += glmCarTranslation;
 
 	// Checkers Model
 	simpleShader->use();
@@ -148,26 +187,17 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	simpleShader->setUniformFloat("light.ambientCoefficient", pointLight.ambientCoefficient);
 	simpleShader->setUniformFloat("time", time);
 	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	//simpleShader->setUniformFloat("materialShininess", 5.0f);
-	simpleShader->setUniformVec3("cameraPosition", extractCameraPosition(mvp));	simpleShader->setUniformFloat("materialShininess", 5.0f);
+	simpleShader->setUniformFloat("materialShininess", 5.0f);
+	simpleShader->setUniformVec3("cameraPosition", extractCameraPosition(mvp));
 	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
-	//checkers_model->draw(simpleShader);
+	checkers_model->draw(simpleShader);
 
 	sunShader->use();
 	sunShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	sunShader->setUniformFloat("time", time);
-	sunShader->setUniformVec3("cameraPosition", cameraPosition);
-	float scale = 0.01f;
-	GLfloat carRotation = M_PI / 2 ;
-	mvp = glm::rotate(mvp, carRotation, glm::vec3(0, 1, 0));
-	glm::mat4 sunMat4 = mvp;
-	//sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
-	sunMat4 = glm::translate(sunMat4,pointLight.position);
 	sunShader->setUniformMatrix4("modelViewProjectionMatrix", sunMat4);
 	sun_model->draw(sunShader);
 	
-	mvp = glm::translate(mvp, glmCarTranslation);
-	mvp = glm::translate(mvp, cameraPosition);		
 	// Racetrack
 	noiseShader->use();
 	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
@@ -181,10 +211,28 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformFloat("materialShininess", 5.0f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
-	checkers_model->draw(sunShader);
+	physics.world->debugDrawWorld();
 
+	//fbo
+	//glDrawBuffers(GL_DRAW_FRAMEBUFFER, &fboID);
+	return;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	std::vector<glm::vec3> verts;
+	float zas = 0;
+	verts.push_back(glm::vec3(-1, -1,zas));
+	verts.push_back(glm::vec3(1, -1, zas));
+	verts.push_back(glm::vec3(1, 1, zas));
+	verts.push_back(glm::vec3(-1, 1, zas));
+
+	fboShader->use();
+	//glUniform1i(shader->getUniform("s_texture"), 0);
+
+	glBindTexture(GL_TEXTURE_2D, fboTextureID);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
+	glDrawArrays(GL_QUADS, 0, verts.size());																//en tekenen :)
 	// Etc
-	glUseProgram(0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, oldFbo);
 }
 
 // No Scaling
