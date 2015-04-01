@@ -68,7 +68,7 @@ void Physics::addCar(){
 	float mass = 1.0f;//kg
 	btVector3 fallInertia;
 	btBoxShape* pBoxShape = new btBoxShape(btVector3(1,1,1));
-	btMotionState* m_pMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-6.0f, 2,0)));
+	btMotionState* m_pMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-6.0f, 0,0)));
 	pBoxShape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, m_pMotionState, pBoxShape, fallInertia);
 	realCar = new btRigidBody(rbInfo);
@@ -99,5 +99,5 @@ void Physics::updateCar(float timeFactor){
 	realCar->activate();
 	world->stepSimulation(timeFactor);//en updaten
 	btVector3 b2 = realCar->getWorldTransform().getOrigin();
-	//printf("auto %f,%f,%f :%f rad %d\n", b2.x(), b2.y(), b2.z(), rotationFactor, realCar->getCollisionFlags());
+	printf("auto %f,%f,%f :%f rad %d\n", b2.x(), b2.y(), b2.z(), rotationFactor, realCar->getCollisionFlags());
 }

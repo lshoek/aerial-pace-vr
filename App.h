@@ -38,7 +38,6 @@ class App : public Application
 		GLint fps;
 		clock_t clock_start = clock();
 		Physics physics;
-		//FrameBufferObject fbo;
 		ShaderProgram *simpleShader, *noiseShader, *sunShader, *airnoiseShader;
 		Light pointLight;
 
@@ -51,4 +50,7 @@ class App : public Application
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
 
 		glm::vec3 extractCameraPosition(const glm::mat4 &modelView);
+		GLuint fboID;
+		GLuint *fboTexture;
+		ShaderProgram *fboShader;
 };

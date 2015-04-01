@@ -12,7 +12,6 @@ App::App(WiiMoteWrapper* w)
 	wiiMoteWrapper = w; 
 }
 App::~App(void){
-	//fbo.~FrameBufferObject();
 }
 
 
@@ -45,10 +44,6 @@ void App::init(void)
 	sunShader = new ShaderProgram("data/aerial-pace-vr/shaders/sunshader.vert", "data/aerial-pace-vr/shaders/sunshader.frag");
 	sunShader->link();
 
-	//fbo.endShader = new ShaderProgram("data/aerial-pace-vr/shaders/motionblur.vert", "data/aerial-pace-vr/shaders/motionblur.frag");
-	//fbo.endShader->link();
-	//fbo.initFBO();
-
 	airnoiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/airnoise.vert", "data/aerial-pace-vr/shaders/airnoise.frag");
 	airnoiseShader->link();
 	airnoiseShader->setUniformInt("s_texture", 0);
@@ -56,6 +51,15 @@ void App::init(void)
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+
+
+	//fbo
+	glGenFramebuffers(1, &fboID);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboID);
+	glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, 512);
+	glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, 512);
+	glFramebufferParameteri(GL_DRAW_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_SAMPLES, 4);
+
 }
 
 void App::preFrame(double frameTime, double totalTime)
@@ -109,13 +113,6 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
-	//bind fbo
-	//glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboId);
-	//fbo.endShader->use();
-	//glBindTexture(GL_TEXTURE_2D, fbo.fboTextureId);
-	//glUniform1i(fbo.endShader->getUniformLocation("s_texture"), 0);
-	//glEnableVertexAttribArray(1);
-	//glBindBuffer(GL_ARRAY_BUFFER, fbo.vbo_fbo_vertices);
 	
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
@@ -132,7 +129,6 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * viewMatrix; // glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-
 	// Cube Model (Air)
 	airnoiseShader->use();
 	airnoiseShader->setUniformFloat("time", time);
@@ -141,7 +137,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	btVector3 carTranslation = physics.realCar->getWorldTransform().getOrigin();
 	glm::vec3 cameraPosition(0, 0, 10.0f);
 	glm::vec3 glmCarTranslation(carTranslation.x(), carTranslation.y()-2, carTranslation.z());
-	//cameraPosition += glmCarTranslation;
+	cameraPosition += glmCarTranslation;
 	// Checkers Model
 	simpleShader->use();
 	simpleShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
@@ -161,14 +157,15 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	sunShader->setUniformFloat("time", time);
 	sunShader->setUniformVec3("cameraPosition", cameraPosition);
 	float scale = 0.01f;
+	GLfloat carRotation = M_PI / 2 ;
+	mvp = glm::rotate(mvp, carRotation, glm::vec3(0, 1, 0));
 	glm::mat4 sunMat4 = mvp;
 	//sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
 	sunMat4 = glm::translate(sunMat4,pointLight.position);
 	sunShader->setUniformMatrix4("modelViewProjectionMatrix", sunMat4);
 	sun_model->draw(sunShader);
 	
-	GLfloat carRotation = M_PI/2;
-	//mvp = glm::rotate(mvp, carRotation, glm::vec3(0,1,0));
+	
 	mvp = glm::translate(mvp, cameraPosition);
 		
 	// Racetrack
@@ -189,10 +186,10 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	// Etc
 	glUseProgram(0);
 	//DrawWireFrame();
-
+	DrawAxii();
 	glDisable(GL_DEPTH_TEST);
 
-	//DrawAxii();
+	
 	//DrawPoint(pointLight.position);
 }
 
