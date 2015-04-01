@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Physics.h"
 #include "DebugFunctions.h"
+#include "DebugDrawer.h"
 
 
 namespace blib { class Texture; class Font; class StaticModel; }
@@ -33,10 +34,10 @@ class App : public Application
 		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
 		WiiMoteWrapper * wiiMoteWrapper;
 		Camera* camera;
+		DebugDrawer* m_pDebugDrawer;
 		GLint fps;
 		clock_t clock_start = clock();
 		Physics physics;
-		//FrameBufferObject fbo;
 		ShaderProgram *simpleShader, *noiseShader, *sunShader, *airnoiseShader;
 		Light pointLight;
 
@@ -48,5 +49,8 @@ class App : public Application
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
 
-		glm::vec3 extractCameraPosition(const glm::mat4 &);
+		glm::vec3 extractCameraPosition(const glm::mat4 &modelView);
+		GLuint fboID;
+		GLuint *fboTexture;
+		ShaderProgram *fboShader;
 };
