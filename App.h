@@ -30,7 +30,7 @@ class App : public Application
 			float attentuation;
 		};
 		PositionalDevice headDevice, cameraDevice;
-		DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
+		//DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
 		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
 		WiiMoteWrapper * wiiMoteWrapper;
 		Camera* camera;
@@ -40,6 +40,7 @@ class App : public Application
 		Physics physics;
 		ShaderProgram *simpleShader, *noiseShader, *sunShader, *airnoiseShader;
 		Light pointLight;
+		
 
 	public:
 		App(WiiMoteWrapper * w);

@@ -9,7 +9,7 @@
 
 App::App(WiiMoteWrapper* w)
 {
-	wiiMoteWrapper = w; 
+	wiiMoteWrapper = w;
 }
 App::~App(void){
 }
@@ -33,7 +33,7 @@ void App::init(void)
 	pointLight.ambientCoefficient = 0.5f;
 	pointLight.attentuation = 0.2f;
 	physics.addFloor(racetrack_model);
-	
+
 	simpleShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");
 	simpleShader->link();
 	simpleShader->setUniformInt("s_texture", 0);
@@ -51,18 +51,16 @@ void App::init(void)
 
 	fboShader = new ShaderProgram("data/aerial-pace-vr/shaders/postprocess.vert", "data/aerial-pace-vr/shaders/postprocess.frag");
 	fboShader->link();
-	//fboShader->setUniformInt("s_texture", 0);
+	fboShader->setUniformInt("s_texture", 0);
 
 	physics.world->setDebugDrawer(m_pDebugDrawer);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-
-	return;
 	//fbo
 	glGenTextures(1, &fboID);
 	glBindTexture(GL_TEXTURE_2D, fboTextureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 500, 1200, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -71,14 +69,16 @@ void App::init(void)
 	glGenFramebuffers(1, &fboID);
 	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
 
-	
 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1264, 682, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextureID, 0);
-	
+
 	glGenRenderbuffers(1, &rboId);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 500, 1200);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1264 * 2, 682 * 2);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+	int a = glGetError();
+	auto b = glewGetErrorString(a);
 
 	GLenum e = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 
@@ -113,14 +113,14 @@ void App::preFrame(double frameTime, double totalTime)
 	//Check K
 	if (GetAsyncKeyState(75) != 0)
 	{
-		wiiMoteWrapper->buttonTwo = true;		
+		wiiMoteWrapper->buttonTwo = true;
 	}
 	else
 		wiiMoteWrapper->buttonTwo = false;
 	//Check L
 	if (GetAsyncKeyState(76) != 0)
 	{
-		wiiMoteWrapper->degrees =30;
+		wiiMoteWrapper->degrees = 30;
 	}
 	if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
 		wiiMoteWrapper->degrees = 0;
@@ -128,28 +128,29 @@ void App::preFrame(double frameTime, double totalTime)
 
 	//camera
 	/*if (upArrow.getData() == ON)
-		camera->updateSpeed();
+	camera->updateSpeed();
 	if (leftArrow.getData() == ON)
-		camera->rotateCamYaw(-1.0f);
+	camera->rotateCamYaw(-1.0f);
 	else if (rightArrow.getData() == ON)
-		camera->rotateCamYaw(1.0f);*/
+	camera->rotateCamYaw(1.0f);*/
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
-	
+
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
-	
+
 	// Car
 	btVector3 carTranslation = physics.realCar->getWorldTransform().getOrigin();
 	glm::vec3 cameraPosition(0, 0, 10.0f);
 	glm::vec3 glmCarTranslation(-carTranslation.x(), -carTranslation.y() - 2, -carTranslation.z());
-	
+
 	// Devices
 	glm::mat4 headData = headDevice.getData();
 	glm::mat4 viewMatrix = modelViewMatrix * headData;
@@ -159,9 +160,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * viewMatrix; // glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	mvp = glm::rotate(mvp, -90.0f - physics.realCar->getWorldTransform().getRotation().getAngle(), glm::vec3(0, 1, 0));
+	mvp = glm::rotate(mvp, -physics.realCar->getWorldTransform().getRotation().getAngle(), glm::vec3(0, 1, 0));
 	mvp = glm::translate(mvp, glmCarTranslation);
-	
+
 
 	// Sun
 	float scale = 0.1f;
@@ -170,7 +171,6 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	sunMat4 = glm::translate(sunMat4, pointLight.position);
 	sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
 	//fbo
-	//glBindFramebuffer(GL_FRAMEBUFFER, fboID);
 	
 	// Cube Model (Air)
 	airnoiseShader->use();
@@ -197,7 +197,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	sunShader->setUniformFloat("time", time);
 	sunShader->setUniformMatrix4("modelViewProjectionMatrix", sunMat4);
 	sun_model->draw(sunShader);
-	
+
 	// Racetrack
 	noiseShader->use();
 	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
@@ -214,25 +214,33 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	physics.world->debugDrawWorld();
 
 	//fbo
-	//glDrawBuffers(GL_DRAW_FRAMEBUFFER, &fboID);
-	return;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	std::vector<glm::vec3> verts;
-	float zas = 0;
-	verts.push_back(glm::vec3(-1, -1,zas));
-	verts.push_back(glm::vec3(1, -1, zas));
-	verts.push_back(glm::vec3(1, 1, zas));
-	verts.push_back(glm::vec3(-1, 1, zas));
 
+	//glDrawBuffers(GL_DRAW_FRAMEBUFFER, &fboID);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, 1264, 682);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	std::vector<glm::vec2> verts;
+	verts.push_back(glm::vec2(-1, -1));
+	verts.push_back(glm::vec2(1, -1));
+	verts.push_back(glm::vec2(1, 1));
+	verts.push_back(glm::vec2(-1, 1));
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 	fboShader->use();
-	//glUniform1i(shader->getUniform("s_texture"), 0);
+	glEnableVertexAttribArray(0);							// en vertex attribute 1
+	glDisableVertexAttribArray(1);							// disable vertex attribute 1
+	glDisableVertexAttribArray(2);							// disable vertex attribute 1
+
 
 	glBindTexture(GL_TEXTURE_2D, fboTextureID);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
-	glDrawArrays(GL_QUADS, 0, verts.size());																//en tekenen :)
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
+	glDrawArrays(GL_QUADS, 0, verts.size());
+
 	// Etc
 	//glBindFramebuffer(GL_FRAMEBUFFER, oldFbo);
+	glUseProgram(0);
 }
 
 // No Scaling

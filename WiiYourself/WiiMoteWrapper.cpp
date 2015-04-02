@@ -157,7 +157,7 @@ reconnect:
 
 	// connected - light all LEDs
 	remote.SetLEDs(0x0f);
-	BRIGHT_CYAN; _tprintf(_T("\b\b\b\b... connected!")); WHITE;
+	//BRIGHT_CYAN; _tprintf(_T("\b\b\b\b... connected!")); WHITE;
 	status = 1;
 #ifdef USE_BEEPS_AND_DELAYS
 	//Beep(1000, 300); 
