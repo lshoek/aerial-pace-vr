@@ -43,8 +43,7 @@ class App : public Application
 		
 
 	public:
-		bool useFBO = true;
-		
+		glm::vec2 screenSize;
 		App(WiiMoteWrapper * w);
 		~App(void);
 		
