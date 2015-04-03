@@ -43,6 +43,8 @@ class App : public Application
 		
 
 	public:
+		bool useFBO = true;
+		
 		App(WiiMoteWrapper * w);
 		~App(void);
 		
@@ -52,7 +54,7 @@ class App : public Application
 
 		glm::vec3 extractCameraPosition(const glm::mat4 &modelView);
 		GLuint fboID;
-		GLuint rboId;
+		GLuint rboID;
 		GLuint fboTextureID;
 		ShaderProgram *fboShader;
 };

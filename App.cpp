@@ -12,6 +12,10 @@ App::App(WiiMoteWrapper* w)
 	wiiMoteWrapper = w;
 }
 App::~App(void){
+	glUseProgram(0);
+	glDeleteTextures(1, &fboTextureID);
+	glDeleteFramebuffers(1, &fboID);
+	glDeleteRenderbuffers(1, &rboID);
 }
 
 
@@ -58,6 +62,8 @@ void App::init(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	//fbo
+	if (useFBO == false)
+		return;
 	glGenTextures(1, &fboID);
 	glBindTexture(GL_TEXTURE_2D, fboTextureID);
 
@@ -73,10 +79,11 @@ void App::init(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1264, 682, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextureID, 0);
 
-	glGenRenderbuffers(1, &rboId);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+	glGenRenderbuffers(1, &rboID);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboID);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1264 * 2, 682 * 2);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboID);
+	
 	int a = glGetError();
 	auto b = glewGetErrorString(a);
 
@@ -137,7 +144,8 @@ void App::preFrame(double frameTime, double totalTime)
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
+	if (useFBO)
+		glBindFramebuffer(GL_FRAMEBUFFER, fboID);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//
 	glEnable(GL_TEXTURE_2D);
@@ -213,33 +221,34 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	racetrack_model->draw(noiseShader);
 	physics.world->debugDrawWorld();
 
-	//fbo
+	if (useFBO){
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, 1264, 682);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glDrawBuffers(GL_DRAW_FRAMEBUFFER, &fboID);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, 1264, 682);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		std::vector<glm::vec2> verts;
+		verts.push_back(glm::vec2(-1, -1));
+		verts.push_back(glm::vec2(1, -1));
+		verts.push_back(glm::vec2(1, 1));
+		verts.push_back(glm::vec2(-1, 1));
 
-	std::vector<glm::vec2> verts;
-	verts.push_back(glm::vec2(-1, -1));
-	verts.push_back(glm::vec2(1, -1));
-	verts.push_back(glm::vec2(1, 1));
-	verts.push_back(glm::vec2(-1, 1));
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	fboShader->use();
-	glEnableVertexAttribArray(0);							// en vertex attribute 1
-	glDisableVertexAttribArray(1);							// disable vertex attribute 1
-	glDisableVertexAttribArray(2);							// disable vertex attribute 1
+		//glBindBuffer(GL_ARRAY_BUFFER, 0);
+		
+		fboShader->use();
+		noiseShader->setUniformFloat("time", GLfloat(clock()));
+		glBindVertexArray(0);
+		glEnableVertexAttribArray(0);							// en vertex attribute 1
+		glDisableVertexAttribArray(1);							// disable vertex attribute 1
+		glDisableVertexAttribArray(2);							// disable vertex attribute 1
 
 
-	glBindTexture(GL_TEXTURE_2D, fboTextureID);
-	glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
-	glDrawArrays(GL_QUADS, 0, verts.size());
+		glBindTexture(GL_TEXTURE_2D, fboTextureID);
+		glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
+		glDrawArrays(GL_QUADS, 0, verts.size());
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glDisableVertexAttribArray(0);
 
-	// Etc
-	//glBindFramebuffer(GL_FRAMEBUFFER, oldFbo);
+	}
 	glUseProgram(0);
 }
 
