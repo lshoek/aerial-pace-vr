@@ -11,7 +11,6 @@
 #include <iostream>
 
 #include "WiiYourself/WiiMoteWrapper.h"
-#include "Camera.h"
 #include "Physics.h"
 #include "DebugFunctions.h"
 #include "DebugDrawer.h"
@@ -33,7 +32,6 @@ class App : public Application
 		//DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
 		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
 		WiiMoteWrapper * wiiMoteWrapper;
-		Camera* camera;
 		DebugDrawer* m_pDebugDrawer;
 		GLint fps;
 		clock_t clock_start = clock();

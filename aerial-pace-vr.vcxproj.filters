@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="WiiYourself\WiiLib.cpp">
@@ -18,7 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
-    <ClInclude Include="Camera.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="WiiYourself\WiiMoteWrapper.h">
       <Filter>WiiYourself</Filter>
