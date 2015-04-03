@@ -29,7 +29,7 @@ class App : public Application
 			float attentuation;
 		};
 		PositionalDevice headDevice, cameraDevice;
-		//DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
+		cTexture* normals_texture,* normals_texture2;
 		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
 		WiiMoteWrapper * wiiMoteWrapper;
 		DebugDrawer* m_pDebugDrawer;

@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #include <GL\glew.h>
 #include <Windows.h>
+#include <CaveLib\texture.h>
 #include <CaveLib\model.h>
 #include "App.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -31,6 +32,7 @@ void App::init(void)
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	sun_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));
+	normals_texture = CaveLib::loadTexture("data/aerial-pace-vr/textures/normalmap2.png", new TextureLoadOptions(GL_FALSE));
 	pointLight.position = glm::vec3(-30.0f, 5.0f, 20.0f);
 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
 	pointLight.ambientCoefficient = 0.5f;
@@ -39,22 +41,18 @@ void App::init(void)
 
 	simpleShader = new ShaderProgram("data/aerial-pace-vr/shaders/simple.vert", "data/aerial-pace-vr/shaders/simple.frag");
 	simpleShader->link();
-	simpleShader->setUniformInt("s_texture", 0);
 
 	noiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/perlinnoise.vert", "data/aerial-pace-vr/shaders/perlinnoise.frag");
 	noiseShader->link();
-	noiseShader->setUniformInt("s_texture", 0);
 
 	sunShader = new ShaderProgram("data/aerial-pace-vr/shaders/sunshader.vert", "data/aerial-pace-vr/shaders/sunshader.frag");
 	sunShader->link();
 
 	airnoiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/airnoise.vert", "data/aerial-pace-vr/shaders/airnoise.frag");
 	airnoiseShader->link();
-	airnoiseShader->setUniformInt("s_texture", 0);
 
 	fboShader = new ShaderProgram("data/aerial-pace-vr/shaders/postprocess.vert", "data/aerial-pace-vr/shaders/postprocess.frag");
 	fboShader->link();
-	fboShader->setUniformInt("s_texture", 0);
 
 	physics.world->setDebugDrawer(m_pDebugDrawer);
 
@@ -173,6 +171,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Checkers Model
 	simpleShader->use();
+	simpleShader->setUniformInt("s_texture", 0);
+	glUniform1i(simpleShader->getUniformLocation("s_normals"), 1);
+	glBindTexture(GL_TEXTURE_2D, normals_texture->tid());
 	simpleShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	simpleShader->setUniformVec3("light.position", pointLight.position);
 	simpleShader->setUniformVec3("light.intensities", pointLight.intensities);
@@ -194,6 +195,8 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Racetrack
 	noiseShader->use();
+	glUniform1i(noiseShader->getUniformLocation("s_normals"), 0);
+	glBindTexture(GL_TEXTURE_2D, normals_texture->tid());
 	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	noiseShader->setUniformVec3("light.position", pointLight.position);
 	noiseShader->setUniformVec3("light.intensities", pointLight.intensities);
@@ -205,7 +208,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformFloat("materialShininess", 5.0f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
-	physics.world->debugDrawWorld();
+	//physics.world->debugDrawWorld();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, 1264, 682);
@@ -220,13 +223,13 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	fboShader->use();
+	fboShader->setUniformInt("s_texture", 0);
 	fboShader->setUniformFloat("time", time);
 	fboShader->setUniformVec2("screenSize", screenSize);
 	glBindVertexArray(0);
 	glEnableVertexAttribArray(0);							// en vertex attribute 1
 	glDisableVertexAttribArray(1);							// disable vertex attribute 1
 	glDisableVertexAttribArray(2);							// disable vertex attribute 1
-
 
 	glBindTexture(GL_TEXTURE_2D, fboTextureID);
 	glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
