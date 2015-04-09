@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <ctime>
 #include <iostream>
+#include <thread>
 
 #include "WiiYourself/WiiMoteWrapper.h"
 #include "Camera.h"
@@ -29,10 +30,18 @@ class App : public Application
 			float ambientCoefficient;
 			float attentuation;
 		};
+		struct FrameBufferObject{
+			GLuint fboID;
+			GLuint rboID;
+			GLuint fboTextureID;
+			GLuint rboTextureID;
+			std::vector<ShaderProgram*> fboShaders;
+			int currentShader = 5-5;
+		};
 		PositionalDevice headDevice, cameraDevice;
 		//DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
 		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
-		WiiMoteWrapper * wiiMoteWrapper;
+		
 		Camera* camera;
 		DebugDrawer* m_pDebugDrawer;
 		GLint fps;
@@ -40,7 +49,6 @@ class App : public Application
 		Physics physics;
 		ShaderProgram *simpleShader, *noiseShader, *sunShader, *airnoiseShader;
 		Light pointLight;
-		
 
 	public:
 		glm::vec2 screenSize;
@@ -50,10 +58,10 @@ class App : public Application
 		void init();
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
+		WiiMoteWrapper * wiiMoteWrapper;
 
 		glm::vec3 extractCameraPosition(const glm::mat4 &modelView);
-		GLuint fboID;
-		GLuint rboID;
-		GLuint fboTextureID;
-		ShaderProgram *fboShader;
+		FrameBufferObject fbo;
+		clock_t nextTimeToCheck = clock();
 };
+

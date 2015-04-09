@@ -4,6 +4,7 @@
 #include "WiiYourself/WiiMoteWrapper.h"
 #include <thread>
 
+
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -20,7 +21,7 @@ int main(int argc, char* argv[])
 			i++;
 			kernel->loadConfig(argv[i]);
 		}
-	}
+	}	
 	kernel->setApp(app);
 	kernel->start();	
 	delete app;
