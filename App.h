@@ -12,7 +12,6 @@
 #include <thread>
 
 #include "WiiYourself/WiiMoteWrapper.h"
-#include "Camera.h"
 #include "Physics.h"
 #include "DebugFunctions.h"
 #include "DebugDrawer.h"
@@ -39,10 +38,10 @@ class App : public Application
 			int currentShader = 5-5;
 		};
 		PositionalDevice headDevice, cameraDevice;
-		//DigitalDevice upArrow, downArrow, leftArrow, rightArrow;
+		cTexture* normals_texture,* normals_texture2;
 		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
-		
-		Camera* camera;
+		//Camera* camera;
+		WiiMoteWrapper * wiiMoteWrapper;
 		DebugDrawer* m_pDebugDrawer;
 		GLint fps;
 		clock_t clock_start = clock();
@@ -58,7 +57,6 @@ class App : public Application
 		void init();
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
-		WiiMoteWrapper * wiiMoteWrapper;
 
 		glm::vec3 extractCameraPosition(const glm::mat4 &modelView);
 		FrameBufferObject fbo;
