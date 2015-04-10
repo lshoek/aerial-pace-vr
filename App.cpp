@@ -28,7 +28,7 @@ void App::init(void)
 	m_pDebugDrawer->setDebugMode(3);
 	headDevice.init("MainUserHead");
 	cameraDevice.init("CameraPosition");
-	physics.bullet3Init(wiiMoteWrapper);
+	physics.bullet3Init();
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	sun_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
@@ -55,9 +55,11 @@ void App::init(void)
 	std::vector<string> shaders;
 	shaders.push_back("normalpostprocess");
 	shaders.push_back("blur");
-	shaders.push_back("threshold");
+	//shaders.push_back("threshold");
 	shaders.push_back("mirror1");
 	shaders.push_back("mirror2"); 
+	shaders.push_back("mirror3");
+	//shaders.push_back("draaien");
 	shaders.push_back("shining");
 
 	for each (string shader in shaders)
@@ -127,30 +129,30 @@ void App::preFrame(double frameTime, double totalTime)
 	//Check I
 	if (GetAsyncKeyState(73) != 0)
 	{
-		wiiMoteWrapper->buttonOne = true;
+		//wiiMoteWrapper->buttonOne = true;
 	}
 	else
-		wiiMoteWrapper->buttonOne = false;
+		//wiiMoteWrapper->buttonOne = false;
 	//Check J
 	if (GetAsyncKeyState(74) != 0)
 	{
-		wiiMoteWrapper->degrees = -30;
+		//wiiMoteWrapper->degrees = -30;
 	}
 	//Check K
 	if (GetAsyncKeyState(75) != 0)
 	{
-		wiiMoteWrapper->buttonTwo = true;
+		//wiiMoteWrapper->buttonTwo = true;
 	}
 	else
-		wiiMoteWrapper->buttonTwo = false;
+		//wiiMoteWrapper->buttonTwo = false;
 	//Check L
 	if (GetAsyncKeyState(76) != 0)
 	{
-		wiiMoteWrapper->degrees = 30;
+		//wiiMoteWrapper->degrees = 30;
 	}
 	if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
-		wiiMoteWrapper->degrees = 0;
-	physics.updateCar(timeFctr);
+		//wiiMoteWrapper->degrees = 0;
+	physics.updateCar(timeFctr,wiiMoteWrapper);
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
@@ -234,7 +236,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformFloat("materialShininess", 5.0f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
-	//physics.world->debugDrawWorld();
+	physics.world->debugDrawWorld();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, screenSize.x, screenSize.y);

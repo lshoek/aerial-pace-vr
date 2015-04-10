@@ -16,8 +16,7 @@ Physics::~Physics()
 	delete broadphase;
 }
 
-int Physics::bullet3Init(WiiMoteWrapper* w){
-	wiiMoteWrapper = w;
+int Physics::bullet3Init(){
 	broadphase = new btDbvtBroadphase();
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
@@ -82,7 +81,7 @@ void Physics::addCar(){
 	world->addRigidBody(realCar);
 }
 
-void Physics::updateCar(float timeFactor){
+void Physics::updateCar(float timeFactor, WiiMoteWrapper * wiiMoteWrapper){
 	float deltaspeed = 0;
 	if (wiiMoteWrapper->buttonOne){//speed goes down
 		deltaspeed -= MAXFORCE * timeFactor;
@@ -99,8 +98,8 @@ void Physics::updateCar(float timeFactor){
 	glm::vec4 p1 = glm::vec4(0, 0, 0, 1)*carmvp;
 	glm::vec4 p2 = glm::vec4(1, 0, 0, 1)*carmvp;
 	btVector3 p3(p2.x - p1.x, 0, p2.z - p1.z);
-	//realCar->applyCentralForce(deltaposition*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
-	realCar->applyForce(deltaposition*p3,btVector3(0.9,0,0)*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
+	realCar->applyCentralForce(deltaposition*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
+	//realCar->applyForce(deltaposition*p3,btVector3(0.9,0,0)*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
 	realCar->activate();
 	world->stepSimulation(timeFactor);//en updaten
 	btVector3 b2 = realCar->getWorldTransform().getOrigin();

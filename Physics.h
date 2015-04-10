@@ -40,13 +40,13 @@ public:
 	btCollisionObject *						level;
 	btRigidBody *							realCar;
 
-	int Physics::bullet3Init(WiiMoteWrapper* w);
+	int Physics::bullet3Init();
 	void addCar();
 	void addFloor(cModel* stage);
-	void updateCar(float timeFactor);
+	void updateCar(float timeFactor, WiiMoteWrapper * wiiMoteWrapper);
 
 	
 	static const float MAXFORCE;
-	WiiMoteWrapper * wiiMoteWrapper;
+	
 };
 
