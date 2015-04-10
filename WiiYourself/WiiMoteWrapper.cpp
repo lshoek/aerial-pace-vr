@@ -235,18 +235,9 @@ reconnect:
 			const TCHAR* button_name = wiimote::ButtonNameFromBit[bit];
 			bool		 pressed = ((remote.Button.Bits & mask) != 0);
 			//if (bit > 0) {	CYAN; _tprintf(_T("|")); // seperator	}
-			if (button_name == _T("One"))
-			{
-				buttonOne = pressed;
-			}
-			if (button_name == _T("Two"))
-			{
-				buttonTwo = pressed;
-			}
-			if (button_name == _T("Home"))
-			{
-				buttonHome = pressed;
-			}
+			buttonOne = remote.Button.One() == 1;
+			buttonTwo = remote.Button.Two() == 1;
+			buttonHome = remote.Button.Home() == 1;
 			//if (pressed) {
 			//	BRIGHT_WHITE; _tprintf(_T("%s"), button_name);
 			//}
@@ -268,7 +259,6 @@ reconnect:
 		//if (remote.Acceleration.Orientation.UpdateAge > 10)
 		//	RED;
 		degrees = remote.Acceleration.Orientation.Pitch;
-		remote.MotionPlus.Speed.Yaw;
 		while (degrees > 360.0) degrees -= 360.0;
 		while (degrees < -360.0) degrees += 360.0;
 		/*_tprintf(_T("Pitch:%4ddeg  Roll:%4ddeg  \n")

@@ -32,7 +32,7 @@ void App::init(void)
 	m_pDebugDrawer->setDebugMode(3);
 	headDevice.init("MainUserHead");
 	cameraDevice.init("CameraPosition");
-	physics.bullet3Init(wiiMoteWrapper);
+	physics.bullet3Init();
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	sun_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
@@ -126,30 +126,30 @@ void App::preFrame(double frameTime, double totalTime)
 	//Check I
 	if (GetAsyncKeyState(73) != 0)
 	{
-		wiiMoteWrapper->buttonOne = true;
+		//wiiMoteWrapper->buttonOne = true;
 	}
 	else
-		wiiMoteWrapper->buttonOne = false;
+		//wiiMoteWrapper->buttonOne = false;
 	//Check J
 	if (GetAsyncKeyState(74) != 0)
 	{
-		wiiMoteWrapper->degrees = -30;
+		//wiiMoteWrapper->degrees = -30;
 	}
 	//Check K
 	if (GetAsyncKeyState(75) != 0)
 	{
-		wiiMoteWrapper->buttonTwo = true;
+		//wiiMoteWrapper->buttonTwo = true;
 	}
 	else
-		wiiMoteWrapper->buttonTwo = false;
+		//wiiMoteWrapper->buttonTwo = false;
 	//Check L
 	if (GetAsyncKeyState(76) != 0)
 	{
-		wiiMoteWrapper->degrees = 30;
+		//wiiMoteWrapper->degrees = 30;
 	}
 	if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
-		wiiMoteWrapper->degrees = 0;
-	physics.updateCar(timeFctr);
+		//wiiMoteWrapper->degrees = 0;
+	physics.updateCar(timeFctr,wiiMoteWrapper);
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
