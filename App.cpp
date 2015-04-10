@@ -11,18 +11,19 @@
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w;
-	screenSize = glm::vec2(1264, 682);
 }
 App::~App(void){
 	glUseProgram(0);
-	glDeleteTextures(1, &fboTextureID);
-	glDeleteFramebuffers(1, &fboID);
-	glDeleteRenderbuffers(1, &rboID);
+	glDeleteTextures(1, &fbo.fboTextureID);
+	glDeleteTextures(1, &fbo.rboTextureID);
+	glDeleteFramebuffers(1, &fbo.fboID);
+	glDeleteRenderbuffers(1, &fbo.rboID);
 }
 
 
 void App::init(void)
 {
+	screenSize = glm::vec2(Kernel::getInstance()->getWindowWidth(), Kernel::getInstance()->getWindowHeight());
 	m_pDebugDrawer = new DebugDrawer();
 	m_pDebugDrawer->setDebugMode(3);
 	headDevice.init("MainUserHead");
@@ -51,8 +52,21 @@ void App::init(void)
 	airnoiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/airnoise.vert", "data/aerial-pace-vr/shaders/airnoise.frag");
 	airnoiseShader->link();
 
-	fboShader = new ShaderProgram("data/aerial-pace-vr/shaders/postprocess.vert", "data/aerial-pace-vr/shaders/postprocess.frag");
-	fboShader->link();
+	std::vector<string> shaders;
+	shaders.push_back("normalpostprocess");
+	shaders.push_back("blur");
+	shaders.push_back("threshold");
+	shaders.push_back("mirror1");
+	shaders.push_back("mirror2"); 
+	shaders.push_back("shining");
+
+	for each (string shader in shaders)
+		fbo.fboShaders.push_back(new ShaderProgram("data/aerial-pace-vr/shaders/fbo/"+shader+".vert", "data/aerial-pace-vr/shaders/fbo/"+shader+".frag"));
+	for each (ShaderProgram* program in fbo.fboShaders)
+	{
+		program->link();
+		program->setUniformInt("s_texture", 0);
+	}
 
 	physics.world->setDebugDrawer(m_pDebugDrawer);
 
@@ -60,31 +74,24 @@ void App::init(void)
 	glEnable(GL_CULL_FACE);
 
 	//fbo
-	glGenTextures(1, &fboID);
-	glBindTexture(GL_TEXTURE_2D, fboTextureID);
-
+	glGenTextures(1, &fbo.fboID);
+	glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-	glGenFramebuffers(1, &fboID);
-	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
-
-
+	glGenFramebuffers(1, &fbo.fboID);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenSize.x, screenSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTextureID, 0);
-
-	glGenRenderbuffers(1, &rboID);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboID);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenSize.x * 2, screenSize.y * 2);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboID);
-	
-	int a = glGetError();
-	auto b = glewGetErrorString(a);
-
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo.fboTextureID, 0);
+	glGenRenderbuffers(1, &fbo.rboID);
+	glGenTextures(1, &fbo.rboTextureID);
+	glBindTexture(1, fbo.rboTextureID);
+	glBindRenderbuffer(GL_RENDERBUFFER, fbo.rboID);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenSize.x, screenSize.y);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo.rboID);	
+	//auto b = glewGetErrorString(glGetError());
 	GLenum e = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-
 	if (e != GL_FRAMEBUFFER_COMPLETE)
 		printf("There is a problem with the FBO\n");
 }
@@ -98,6 +105,23 @@ void App::preFrame(double frameTime, double totalTime)
 	clock_start = clock();
 	if (GetAsyncKeyState(82) != 0){
 		//physics.addCar();
+	}
+
+	if (GetAsyncKeyState(VK_RIGHT)){
+		if (nextTimeToCheck < clock()){
+			fbo.currentShader++;
+			fbo.currentShader %= fbo.fboShaders.size();
+			nextTimeToCheck = clock() + 130;
+		}
+	}
+
+	if (GetAsyncKeyState(VK_LEFT)){
+		if (nextTimeToCheck < clock()){
+			fbo.currentShader--;
+			if (fbo.currentShader == -1)
+				fbo.currentShader = fbo.fboShaders.size() - 1;
+			nextTimeToCheck = clock() + 130;
+		}
 	}
 
 	//Check I
@@ -131,7 +155,7 @@ void App::preFrame(double frameTime, double totalTime)
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, fboID);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboID);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_TEXTURE_2D);
@@ -158,7 +182,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	mvp = glm::translate(mvp, glmCarTranslation);
 
 	// Sun
-	float scale = 0.2f;
+	float scale = 0.3f;
 	glm::mat4 sunMat4 = mvp;
 	sunMat4 = glm::translate(sunMat4, pointLight.position);
 	sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
@@ -191,6 +215,8 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	sunShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	sunShader->setUniformFloat("time", time);
 	sunShader->setUniformMatrix4("modelViewProjectionMatrix", sunMat4);
+	sunShader->setUniformVec2("screenSize", screenSize);
+	sunShader->setUniformVec3("lightPosition", pointLight.position);
 	sun_model->draw(sunShader);
 
 	// Racetrack
@@ -211,7 +237,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	physics.world->debugDrawWorld();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, 1264, 682);
+	glViewport(0, 0, screenSize.x, screenSize.y);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	std::vector<glm::vec2> verts;
@@ -221,17 +247,18 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	verts.push_back(glm::vec2(-1, 1));
 
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	fboShader->use();
-	fboShader->setUniformInt("s_texture", 0);
-	fboShader->setUniformFloat("time", time);
-	fboShader->setUniformVec2("screenSize", screenSize);
+	ShaderProgram* curFBOShader = fbo.fboShaders[fbo.currentShader];
+	curFBOShader->use();
+	curFBOShader->setUniformFloat("time", time);
+	curFBOShader->setUniformVec2("screenSize", screenSize);
+	curFBOShader->setUniformVec3("lightPosition", pointLight.position);
+	curFBOShader->setUniformMatrix4("mvp", modelViewMatrix);
+	//curFBOShader->setUniformInt("s_texture", 0);
 	glBindVertexArray(0);
 	glEnableVertexAttribArray(0);							// en vertex attribute 1
 	glDisableVertexAttribArray(1);							// disable vertex attribute 1
 	glDisableVertexAttribArray(2);							// disable vertex attribute 1
-
-	glBindTexture(GL_TEXTURE_2D, fboTextureID);
+	glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
 	glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
 	glDrawArrays(GL_QUADS, 0, verts.size());
 	glBindTexture(GL_TEXTURE_2D, 0);
