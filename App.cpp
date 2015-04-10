@@ -61,6 +61,7 @@ void App::init(void)
 	shaders.push_back("mirror3");
 	//shaders.push_back("draaien");
 	shaders.push_back("shining");
+	//shaders.push_back("sunprocessing");
 
 	for each (string shader in shaders)
 		fbo.fboShaders.push_back(new ShaderProgram("data/aerial-pace-vr/shaders/fbo/"+shader+".vert", "data/aerial-pace-vr/shaders/fbo/"+shader+".frag"));
@@ -76,6 +77,8 @@ void App::init(void)
 	glEnable(GL_CULL_FACE);
 
 	//fbo
+	GLint oldFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFbo);
 	glGenTextures(1, &fbo.fboID);
 	glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -96,6 +99,7 @@ void App::init(void)
 	GLenum e = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 	if (e != GL_FRAMEBUFFER_COMPLETE)
 		printf("There is a problem with the FBO\n");
+	glBindFramebuffer(GL_FRAMEBUFFER, oldFbo);
 }
 
 void App::preFrame(double frameTime, double totalTime)
@@ -113,7 +117,7 @@ void App::preFrame(double frameTime, double totalTime)
 		if (nextTimeToCheck < clock()){
 			fbo.currentShader++;
 			fbo.currentShader %= fbo.fboShaders.size();
-			nextTimeToCheck = clock() + 130;
+			nextTimeToCheck = clock() + 200;
 		}
 	}
 
@@ -122,43 +126,50 @@ void App::preFrame(double frameTime, double totalTime)
 			fbo.currentShader--;
 			if (fbo.currentShader == -1)
 				fbo.currentShader = fbo.fboShaders.size() - 1;
-			nextTimeToCheck = clock() + 130;
+			nextTimeToCheck = clock() + 200;
 		}
 	}
 
 	//Check I
 	if (GetAsyncKeyState(73) != 0)
 	{
-		//wiiMoteWrapper->buttonOne = true;
+		wiiMoteWrapper->buttonOne = true;
 	}
 	else
-		//wiiMoteWrapper->buttonOne = false;
+		wiiMoteWrapper->buttonOne = false;
 	//Check J
 	if (GetAsyncKeyState(74) != 0)
 	{
-		//wiiMoteWrapper->degrees = -30;
+		wiiMoteWrapper->degrees = -30;
 	}
 	//Check K
 	if (GetAsyncKeyState(75) != 0)
 	{
-		//wiiMoteWrapper->buttonTwo = true;
+		wiiMoteWrapper->buttonTwo = true;
 	}
 	else
-		//wiiMoteWrapper->buttonTwo = false;
+		wiiMoteWrapper->buttonTwo = false;
 	//Check L
 	if (GetAsyncKeyState(76) != 0)
 	{
-		//wiiMoteWrapper->degrees = 30;
+		wiiMoteWrapper->degrees = 30;
 	}
 	if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
-		//wiiMoteWrapper->degrees = 0;
+		wiiMoteWrapper->degrees = 0;
 	physics.updateCar(timeFctr,wiiMoteWrapper);
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboID);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	GLint oldFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFbo);
+
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	//if (viewport[0] == viewport[2]){		viewport[2] = screenSize.x;	}
+	//glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboID);
+ 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
@@ -188,7 +199,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glm::mat4 sunMat4 = mvp;
 	sunMat4 = glm::translate(sunMat4, pointLight.position);
 	sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
-	
+
 	// Cube Model (Air)
 	airnoiseShader->use();
 	airnoiseShader->setUniformFloat("time", time);
@@ -238,33 +249,32 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	racetrack_model->draw(noiseShader);
 	physics.world->debugDrawWorld();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, screenSize.x, screenSize.y);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glBindFramebuffer(GL_FRAMEBUFFER, oldFbo);
+	//glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	std::vector<glm::vec2> verts;
-	verts.push_back(glm::vec2(-1, -1));
-	verts.push_back(glm::vec2(1, -1));
-	verts.push_back(glm::vec2(1, 1));
-	verts.push_back(glm::vec2(-1, 1));
+	//std::vector<glm::vec2> verts;
+	//verts.push_back(glm::vec2(-1, -1));
+	//verts.push_back(glm::vec2(1, -1));
+	//verts.push_back(glm::vec2(1, 1));
+	//verts.push_back(glm::vec2(-1, 1));
 
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	ShaderProgram* curFBOShader = fbo.fboShaders[fbo.currentShader];
-	curFBOShader->use();
-	curFBOShader->setUniformFloat("time", time);
-	curFBOShader->setUniformVec2("screenSize", screenSize);
-	curFBOShader->setUniformVec3("lightPosition", pointLight.position);
-	curFBOShader->setUniformMatrix4("mvp", modelViewMatrix);
-	//curFBOShader->setUniformInt("s_texture", 0);
-	glBindVertexArray(0);
-	glEnableVertexAttribArray(0);							// en vertex attribute 1
-	glDisableVertexAttribArray(1);							// disable vertex attribute 1
-	glDisableVertexAttribArray(2);							// disable vertex attribute 1
-	glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
-	glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
-	glDrawArrays(GL_QUADS, 0, verts.size());
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisableVertexAttribArray(0);
+	////glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//ShaderProgram* curFBOShader = fbo.fboShaders[fbo.currentShader];
+	//curFBOShader->use();
+	//curFBOShader->setUniformFloat("time", time);
+	//curFBOShader->setUniformVec2("screenSize", screenSize);
+	//curFBOShader->setUniformVec3("lightPosition", pointLight.position);
+	////curFBOShader->setUniformInt("s_texture", 0);
+	//glBindVertexArray(0);
+	//glEnableVertexAttribArray(0);                                                   // en vertex attribute 1
+	//glDisableVertexAttribArray(1);                                                  // disable vertex attribute 1
+	//glDisableVertexAttribArray(2);                                                  // disable vertex attribute 1
+	//glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
+	//glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);                                                                 //geef aan dat de posities op deze locatie zitten
+	//glDrawArrays(GL_QUADS, 0, verts.size());
+	//glBindTexture(GL_TEXTURE_2D, 0);
+	//glDisableVertexAttribArray(0);
 	glUseProgram(0);
 }
 
