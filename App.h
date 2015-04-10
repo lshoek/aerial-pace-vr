@@ -35,12 +35,11 @@ class App : public Application
 			GLuint fboTextureID;
 			GLuint rboTextureID;
 			std::vector<ShaderProgram*> fboShaders;
-			int currentShader = 5-5;
+			int currentShader = 0;
 		};
 		PositionalDevice headDevice, cameraDevice;
 		cTexture* normals_texture,* normals_texture2;
 		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
-		//Camera* camera;
 		WiiMoteWrapper * wiiMoteWrapper;
 		DebugDrawer* m_pDebugDrawer;
 		GLint fps;
