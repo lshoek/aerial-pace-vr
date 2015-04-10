@@ -32,10 +32,10 @@ void App::init(void)
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	sun_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
 	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));
-	normals_texture = CaveLib::loadTexture("data/aerial-pace-vr/textures/normalmap2.png", new TextureLoadOptions(GL_FALSE));
-	pointLight.position = glm::vec3(-30.0f, 5.0f, 20.0f);
+	normals_texture = CaveLib::loadTexture("data/aerial-pace-vr/textures/normalmap3a.png", new TextureLoadOptions(GL_FALSE));
+	pointLight.position = glm::vec3(60.0f, 20.0f, -10.0f);
 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLight.ambientCoefficient = 0.5f;
+	pointLight.ambientCoefficient = 0.6f;
 	pointLight.attentuation = 0.2f;
 	physics.addFloor(racetrack_model);
 
@@ -208,7 +208,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformFloat("materialShininess", 5.0f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
-	//physics.world->debugDrawWorld();
+	physics.world->debugDrawWorld();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, 1264, 682);
