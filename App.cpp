@@ -9,8 +9,6 @@
 #include <glm\ext.hpp>
 #include <functional>
 
-const bool FBO_ENABLED = GL_FALSE;
-
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w;
@@ -19,10 +17,13 @@ App::App(WiiMoteWrapper* w)
 App::~App(void)
 {
 	glUseProgram(0);
-	glDeleteTextures(1, &fbo.fboTextureID);
-	glDeleteTextures(1, &fbo.rboTextureID);
-	glDeleteFramebuffers(1, &fbo.fboID);
-	glDeleteRenderbuffers(1, &fbo.rboID);
+	if (FBO_ENABLED)
+	{
+		glDeleteTextures(1, &fbo.fboTextureID);
+		glDeleteTextures(1, &fbo.rboTextureID);
+		glDeleteFramebuffers(1, &fbo.fboID);
+		glDeleteRenderbuffers(1, &fbo.rboID);
+	}
 }
 
 void App::init(void)
@@ -155,13 +156,19 @@ void App::preFrame(double frameTime, double totalTime)
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
 	if (FBO_ENABLED)
+	{
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboID);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
 
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
+
+	// Update the uniform time variable.
+	GLfloat time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
 
 	// Car
 	btVector3 carPosition = physics.realCar->getWorldTransform().getOrigin();
@@ -171,14 +178,10 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glm::mat4 headData = headDevice.getData();
 	glm::mat4 viewMatrix = modelViewMatrix * headData;
 
-	// Update the uniform time variable.
-	GLfloat time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
-
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * viewMatrix; // glm::mat4 mvp = projectionMatrix * modelViewMatrix;
 	mvp = glm::rotate(mvp, -physics.realCar->getWorldTransform().getRotation().getAngle(), glm::vec3(0, 1, 0));
 	mvp = glm::translate(mvp, glmCarPosition);
-	//std::cout << glm::to_string(extractCameraPosition(mvp)) << "\n";
 
 	// Sun
 	float scale = 0.3f;
@@ -269,8 +272,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glUseProgram(0);
 }
 
-// No Scaling
-glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView)
+void App::setFboEnabled(bool b) { if (b) FBO_ENABLED = false; }
+
+glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView) // No Scaling
 {
 	glm::mat3 rotMat = glm::mat3(modelView);
 	glm::vec3 d(modelView[3]);
