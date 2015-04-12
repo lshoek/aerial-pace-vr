@@ -41,7 +41,7 @@ void App::init(void)
 	normals_texture = CaveLib::loadTexture("data/aerial-pace-vr/textures/normalmap3a.png", new TextureLoadOptions(GL_FALSE));
 	pointLight.position = glm::vec3(60.0f, 20.0f, -10.0f);
 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLight.ambientCoefficient = 0.6f;
+	pointLight.ambientCoefficient = 0.5f;
 	pointLight.attentuation = 0.2f;
 	physics.addFloor(racetrack_model);
 
@@ -69,7 +69,7 @@ void App::init(void)
 		program->setUniformInt("s_texture", 0);
 	}
 
-	physics.world->setDebugDrawer(m_pDebugDrawer);
+	//physics.world->setDebugDrawer(m_pDebugDrawer);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -155,7 +155,7 @@ void App::preFrame(double frameTime, double totalTime)
 	}
 	if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
 		wiiMoteWrapper->degrees = 0;
-	physics.updateCar(timeFctr,wiiMoteWrapper);
+	physics.updateTimeFactor(timeFctr);
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
@@ -185,14 +185,19 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	btVector3 carPosition = physics.realCar->getWorldTransform().getOrigin();
 	glm::vec3 glmCarPosition(-carPosition.x(), -carPosition.y() - 2, -carPosition.z());
 
-	// Devices
-	glm::mat4 headData = headDevice.getData();
-	glm::mat4 viewMatrix = modelViewMatrix * headData;
+	glm::vec4 p1 = modelViewMatrix * glm::vec4(0, 0, 0, 1);
+	glm::vec4 p2 = modelViewMatrix * glm::vec4(0, 0, 1, 1);
+	glm::vec4 direction = p2 - p1;
+	float angle = atan2(direction.z, direction.x);
+	physics.updateCar(angle - (btRadians(180)), wiiMoteWrapper);
 
 	// Mvp
-	glm::mat4 mvp = projectionMatrix * viewMatrix; // glm::mat4 mvp = projectionMatrix * modelViewMatrix;
+	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
 	mvp = glm::rotate(mvp, -physics.realCar->getWorldTransform().getRotation().getAngle(), glm::vec3(0, 1, 0));
 	mvp = glm::translate(mvp, glmCarPosition);
+
+	// Checkers
+	glm::mat4 mvpCheckers = glm::translate(mvp, glm::vec3(10.0f, 0.0f, 0.0f));
 
 	// Sun
 	float scale = 0.3f;
@@ -220,7 +225,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	simpleShader->setUniformFloat("materialShininess", 5.0f);
 	simpleShader->setUniformVec3("cameraPosition", glmCarPosition);
-	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
+	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvpCheckers);
 	checkers_model->draw(simpleShader);
 
 	// Sun
