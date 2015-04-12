@@ -9,6 +9,7 @@
 #include <glm\ext.hpp>
 #include <functional>
 
+const bool FBO_ENABLED = GL_TRUE;
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w;
@@ -75,8 +76,7 @@ void App::init(void)
 
 	if (FBO_ENABLED)
 	{
-		GLint oldFbo;
-		glGenTextures(1, &fbo.fboID);
+		glGenTextures(1, &fbo.fboTextureID);
 		glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -87,8 +87,8 @@ void App::init(void)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenSize.x, screenSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo.fboTextureID, 0);
 		glGenRenderbuffers(1, &fbo.rboID);
-		glGenTextures(1, &fbo.rboTextureID);
-		glBindTexture(1, fbo.rboTextureID);
+		//glGenTextures(1, &fbo.rboTextureID);
+		//glBindTexture(1, fbo.rboTextureID);
 		glBindRenderbuffer(GL_RENDERBUFFER, fbo.rboID);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenSize.x, screenSize.y);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo.rboID);
@@ -96,7 +96,6 @@ void App::init(void)
 		GLenum e = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if (e != GL_FRAMEBUFFER_COMPLETE)
 			printf("There is a problem with the FBO\n");
-		glBindFramebuffer(GL_FRAMEBUFFER, oldFbo);
 	}
 }
 
@@ -138,7 +137,7 @@ void App::preFrame(double frameTime, double totalTime)
 	//Check J
 	if (GetAsyncKeyState(74) != 0)
 	{
-		wiiMoteWrapper->degrees = -30;
+		wiiMoteWrapper->degrees -= 10;
 	}
 	//Check K
 	if (GetAsyncKeyState(75) != 0)
@@ -150,10 +149,10 @@ void App::preFrame(double frameTime, double totalTime)
 	//Check L
 	if (GetAsyncKeyState(76) != 0)
 	{
-		wiiMoteWrapper->degrees = 30;
+		wiiMoteWrapper->degrees += 10;
 	}
-	if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
-		wiiMoteWrapper->degrees = 0;
+	/*if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
+		wiiMoteWrapper->degrees = 0;*/
 	physics.updateTimeFactor(timeFctr);
 }
 
@@ -173,7 +172,6 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
-
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
 
@@ -192,14 +190,14 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	mvp = glm::rotate(mvp, -physics.realCar->getWorldTransform().getRotation().getAngle(), glm::vec3(0, 1, 0));
+	mvp = glm::rotate(mvp, -btRadians(wiiMoteWrapper->degrees+90), glm::vec3(0, 1, 0));
 	mvp = glm::translate(mvp, glmCarPosition);
 
 	// Checkers
 	glm::mat4 mvpCheckers = glm::translate(mvp, glm::vec3(10.0f, 0.0f, 0.0f));
 
 	// Sun
-	float scale = 0.3f;
+	float scale = 1.3f;
 	glm::mat4 sunMat4 = mvp;
 	sunMat4 = glm::translate(sunMat4, pointLight.position);
 	sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
@@ -255,9 +253,11 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	if (FBO_ENABLED)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, oldFbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
 
 		std::vector<glm::vec2> verts;
 		verts.push_back(glm::vec2(-1, -1));

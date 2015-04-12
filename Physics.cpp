@@ -1,5 +1,6 @@
 #include "Physics.h"
 #include <functional>
+#include <math.h>
 
 const float Physics::MAXFORCE = 300.0f;
 
@@ -71,13 +72,13 @@ void Physics::addCar(){
 	float mass = 1.0f;//kg
 	btVector3 fallInertia;
 	btBoxShape* pBoxShape = new btBoxShape(btVector3(1,1,1));
-	btMotionState* m_pMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-6.0f, 0,0)));
+	btMotionState* m_pMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-8.6f, 5,7)));
 	pBoxShape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, m_pMotionState, pBoxShape, fallInertia);
 	realCar = new btRigidBody(rbInfo);
 	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), btRadians(0));	
 	realCar->getWorldTransform().setRotation(newRotation);
-	realCar->setFriction(0.2);
+	realCar->setFriction(0.5);
 	world->addRigidBody(realCar);
 }
 
@@ -90,21 +91,14 @@ void Physics::updateCar(float angle, WiiMoteWrapper* wiiMoteWrapper)
 	if (wiiMoteWrapper->buttonTwo){//speed goes up
 		deltaspeed += MAXFORCE * timeFctr;
 	}
-	btVector3 deltaposition(deltaspeed, 0, deltaspeed);
-	//float rotationFactor = btRadians(wiiMoteWrapper->degrees);
-	realCar->applyTorque(btVector3(0, tempAngle-angle, 0));
-	tempAngle = angle;
-	float mvpRaw[16];
-	realCar->getCenterOfMassTransform().getOpenGLMatrix(mvpRaw);
-	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
-	glm::vec4 p1 = glm::vec4(0, 0, 0, 1)*carmvp;
-	glm::vec4 p2 = glm::vec4(1, 0, 0, 1)*carmvp;
-	btVector3 p3(p2.x - p1.x, 0, p2.z - p1.z);
-	realCar->applyCentralForce(deltaposition*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
-	//realCar->applyForce(deltaposition*p3,btVector3(0.9,0,0)*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
+	btVector3 deltaposition(deltaspeed, 0, 0);
+	float rotationFactor = btRadians(wiiMoteWrapper->degrees);
+	deltaposition = deltaposition.rotate(btVector3(0, 1, 0), rotationFactor);
+	realCar->applyCentralForce(deltaposition);
 	realCar->activate();
 	world->stepSimulation(timeFctr);//en updaten
-	btVector3 b2 = realCar->getWorldTransform().getOrigin();
+	//debug
+	//btVector3 b2 = realCar->getWorldTransform().getOrigin();
 	//printf("auto %f,%f,%f :%f rad %d\n", b2.x(), b2.y(), b2.z(), rotationFactor, realCar->getCollisionFlags());
 }
 
