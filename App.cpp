@@ -10,7 +10,6 @@
 #include <functional>
 
 const bool FBO_ENABLED = GL_TRUE;
-
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w;
@@ -19,10 +18,13 @@ App::App(WiiMoteWrapper* w)
 App::~App(void)
 {
 	glUseProgram(0);
-	glDeleteTextures(1, &fbo.fboTextureID);
-	//glDeleteTextures(1, &fbo.rboTextureID);
-	glDeleteFramebuffers(1, &fbo.fboID);
-	glDeleteRenderbuffers(1, &fbo.rboID);
+	if (FBO_ENABLED)
+	{
+		glDeleteTextures(1, &fbo.fboTextureID);
+		glDeleteTextures(1, &fbo.rboTextureID);
+		glDeleteFramebuffers(1, &fbo.fboID);
+		glDeleteRenderbuffers(1, &fbo.rboID);
+	}
 }
 
 void App::init(void)
@@ -40,7 +42,7 @@ void App::init(void)
 	normals_texture = CaveLib::loadTexture("data/aerial-pace-vr/textures/normalmap3a.png", new TextureLoadOptions(GL_FALSE));
 	pointLight.position = glm::vec3(60.0f, 20.0f, -10.0f);
 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLight.ambientCoefficient = 0.6f;
+	pointLight.ambientCoefficient = 0.5f;
 	pointLight.attentuation = 0.2f;
 	physics.addFloor(racetrack_model);
 
@@ -68,7 +70,7 @@ void App::init(void)
 		program->setUniformInt("s_texture", 0);
 	}
 
-	physics.world->setDebugDrawer(m_pDebugDrawer);
+	//physics.world->setDebugDrawer(m_pDebugDrawer);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -152,7 +154,7 @@ void App::preFrame(double frameTime, double totalTime)
 	}
 	/*if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
 		wiiMoteWrapper->degrees = 0;*/
-	physics.updateCar(timeFctr,wiiMoteWrapper);
+	physics.updateTimeFactor(timeFctr);
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
@@ -162,32 +164,38 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
-	if (FBO_ENABLED){
+	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+	if (FBO_ENABLED)
+	{
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboID);
-		glViewport(0,0,screenSize.x, screenSize.y);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
-	
-	// Car
-	btVector3 carPosition = physics.realCar->getWorldTransform().getOrigin();
-	glm::vec3 glmCarPosition(-carPosition.x(), -carPosition.y() - 2, -carPosition.z());
-
-	// Devices
-	//glm::mat4 headData = headDevice.getData();
-	glm::mat4 viewMatrix = modelViewMatrix;// *headData;
+	float mvpRaw[16];
+	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
 
 	// Update the uniform time variable.
 	GLfloat time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
 
+	// Car
+	btVector3 carPosition = physics.realCar->getWorldTransform().getOrigin();
+	glm::vec3 glmCarPosition(-carPosition.x(), -carPosition.y() - 2, -carPosition.z());
+
+	glm::vec4 p1 = modelViewMatrix * glm::vec4(0, 0, 0, 1);
+	glm::vec4 p2 = modelViewMatrix * glm::vec4(0, 0, 1, 1);
+	glm::vec4 direction = p2 - p1;
+	float angle = atan2(direction.z, direction.x);
+	physics.updateCar(angle - (btRadians(180)), wiiMoteWrapper);
+
 	// Mvp
-	glm::mat4 mvp = projectionMatrix * viewMatrix; // glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	//mvp = glm::rotate(mvp, -physics.realCar->getWorldTransform().getRotation().getAngle(), glm::vec3(0, 1, 0));
+	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
 	mvp = glm::rotate(mvp, -btRadians(wiiMoteWrapper->degrees), glm::vec3(0, 1, 0));
 	mvp = glm::translate(mvp, glmCarPosition);
-	//std::cout << glm::to_string(extractCameraPosition(mvp)) << "\n";
+
+	// Checkers
+	glm::mat4 mvpCheckers = glm::translate(mvp, glm::vec3(10.0f, 0.0f, 0.0f));
 
 	// Sun
 	float scale = 1.3f;
@@ -215,7 +223,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	simpleShader->setUniformFloat("materialShininess", 5.0f);
 	simpleShader->setUniformVec3("cameraPosition", glmCarPosition);
-	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
+	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvpCheckers);
 	checkers_model->draw(simpleShader);
 
 	// Sun
@@ -278,8 +286,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glUseProgram(0);
 }
 
-// No Scaling
-glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView)
+void App::setFboEnabled(bool b) { if (b) FBO_ENABLED = false; }
+
+glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView) // No Scaling
 {
 	glm::mat3 rotMat = glm::mat3(modelView);
 	glm::vec3 d(modelView[3]);
