@@ -32,7 +32,6 @@ void App::init(void)
 	m_pDebugDrawer = new DebugDrawer();
 	m_pDebugDrawer->setDebugMode(3);
 	headDevice.init("MainUserHead");
-	cameraDevice.init("CameraPosition");
 	physics.bullet3Init();
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
