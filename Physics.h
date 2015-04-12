@@ -48,6 +48,5 @@ public:
 
 	static const float MAXFORCE;	
 	float timeFctr = 0.1f;
-	float tempAngle = 90.0f;
 };
 

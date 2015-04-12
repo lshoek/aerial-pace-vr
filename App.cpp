@@ -191,7 +191,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	mvp = glm::rotate(mvp, -btRadians(wiiMoteWrapper->degrees), glm::vec3(0, 1, 0));
+	mvp = glm::rotate(mvp, -btRadians(wiiMoteWrapper->degrees+90), glm::vec3(0, 1, 0));
 	mvp = glm::translate(mvp, glmCarPosition);
 
 	// Checkers
