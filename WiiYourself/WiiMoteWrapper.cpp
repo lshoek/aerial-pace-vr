@@ -8,7 +8,7 @@ using namespace std;
 
 WiiMoteWrapper::WiiMoteWrapper()
 {
-	degrees = 0;
+	degrees = 90;
 	buttonOne = buttonTwo = buttonHome = false;
 	continueGame = true;
 	status = 0; //0 = wachten 1 = succes -1 = niet succes

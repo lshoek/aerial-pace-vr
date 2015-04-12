@@ -1,5 +1,6 @@
 #include "Physics.h"
 #include <functional>
+#include <math.h>
 
 const float Physics::MAXFORCE = 300.0f;
 
@@ -71,7 +72,7 @@ void Physics::addCar(){
 	float mass = 1.0f;//kg
 	btVector3 fallInertia;
 	btBoxShape* pBoxShape = new btBoxShape(btVector3(1,1,1));
-	btMotionState* m_pMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-6.0f, 0,0)));
+	btMotionState* m_pMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-8.6f, 5,7)));
 	pBoxShape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, m_pMotionState, pBoxShape, fallInertia);
 	realCar = new btRigidBody(rbInfo);
@@ -91,14 +92,17 @@ void Physics::updateCar(float timeFactor, WiiMoteWrapper * wiiMoteWrapper){
 	}
 	btVector3 deltaposition(deltaspeed, 0, deltaspeed);
 	float rotationFactor = btRadians(wiiMoteWrapper->degrees);
-	realCar->applyTorque(btVector3(0, rotationFactor, 0));
+	deltaposition = deltaposition.rotate(btVector3(0, 1, 0), rotationFactor);
+	//realCar->applyTorque(btVector3(0, rotationFactor, 0));
 	float mvpRaw[16];
 	realCar->getCenterOfMassTransform().getOpenGLMatrix(mvpRaw);
 	glm::mat4 carmvp = glm::make_mat4(mvpRaw);
 	glm::vec4 p1 = glm::vec4(0, 0, 0, 1)*carmvp;
 	glm::vec4 p2 = glm::vec4(1, 0, 0, 1)*carmvp;
 	btVector3 p3(p2.x - p1.x, 0, p2.z - p1.z);
-	realCar->applyCentralForce(deltaposition*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
+	//p3 = btVector3(p3.x()*cos(rotationFactor)+p3.z()*sin(rotationFactor), 0, -p3.x()*sin(rotationFactor)+p3.z()*cos(rotationFactor));
+	//deltaposition *= p3;
+	realCar->applyCentralForce(deltaposition);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
 	//realCar->applyForce(deltaposition*p3,btVector3(0.9,0,0)*p3);//.rotate(btVector3(0, 1.0, 0), btRadians(wiiMoteWrapper->degrees))
 	realCar->activate();
 	world->stepSimulation(timeFactor);//en updaten
