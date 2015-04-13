@@ -40,7 +40,7 @@ class App : public Application
 		bool FBO_ENABLED = GL_FALSE;
 		PositionalDevice headDevice, cameraDevice;
 		cTexture* normals_texture,* normals_texture2;
-		cModel* cube_model,* checkers_model,* racetrack_model, * sun_model;
+		cModel* cube_model,* checkers_model,* sun_model,* racetrack_model;
 		WiiMoteWrapper * wiiMoteWrapper;
 		DebugDrawer* m_pDebugDrawer;
 		GLint fps;
