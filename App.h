@@ -37,7 +37,7 @@ class App : public Application
 			std::vector<ShaderProgram*> fboShaders;
 			int currentShader = 0;
 		};
-		bool FBO_ENABLED = GL_FALSE;
+		bool SIM_ENABLED = GL_FALSE;
 		PositionalDevice headDevice, cameraDevice;
 		cTexture* normals_texture,* normals_texture2;
 		cModel* cube_model,* checkers_model,* sun_model,* racetrack_model;
@@ -55,7 +55,7 @@ class App : public Application
 		~App(void);
 		
 		void init();
-		void setFboEnabled(bool);
+		void setSimEnabled(bool);
 		void preFrame(double frameTime, double totalTime);
 		void draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix);
 

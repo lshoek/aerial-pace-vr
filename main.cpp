@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 			i++;
 			kernel->loadConfig(argv[i]);
 			if (argv[i] != "oculus.json")
-				app->setFboEnabled(GL_TRUE);
+				app->setSimEnabled(GL_TRUE);
 		}
 	}	
 	kernel->setApp(app);

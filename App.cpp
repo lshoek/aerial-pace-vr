@@ -9,7 +9,6 @@
 #include <glm\ext.hpp>
 #include <functional>
 
-const bool FBO_ENABLED = GL_TRUE;
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w;
@@ -18,7 +17,7 @@ App::App(WiiMoteWrapper* w)
 App::~App(void)
 {
 	glUseProgram(0);
-	if (FBO_ENABLED)
+	if (SIM_ENABLED)
 	{
 		glDeleteTextures(1, &fbo.fboTextureID);
 		glDeleteTextures(1, &fbo.rboTextureID);
@@ -74,7 +73,7 @@ void App::init(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	if (FBO_ENABLED)
+	if (SIM_ENABLED)
 	{
 		glGenTextures(1, &fbo.fboTextureID);
 		glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
@@ -127,32 +126,25 @@ void App::preFrame(double frameTime, double totalTime)
 		}
 	}
 
-	//Check I
-	if (GetAsyncKeyState(73) != 0)
+	if (SIM_ENABLED)
 	{
-		wiiMoteWrapper->buttonOne = true;
+		//Check I
+		if (GetAsyncKeyState(73) != 0)
+			wiiMoteWrapper->buttonOne = true;
+		else
+			wiiMoteWrapper->buttonOne = false;
+		//Check J
+		if (GetAsyncKeyState(74) != 0)
+			wiiMoteWrapper->degrees += 1;
+		//Check K
+		if (GetAsyncKeyState(75) != 0)
+			wiiMoteWrapper->buttonTwo = true;
+		else
+			wiiMoteWrapper->buttonTwo = false;
+		//Check L
+		if (GetAsyncKeyState(76) != 0)
+			wiiMoteWrapper->degrees -= 1;
 	}
-	else
-		wiiMoteWrapper->buttonOne = false;
-	//Check J
-	if (GetAsyncKeyState(74) != 0)
-	{
-		wiiMoteWrapper->degrees += 1;
-	}
-	//Check K
-	if (GetAsyncKeyState(75) != 0)
-	{
-		wiiMoteWrapper->buttonTwo = true;
-	}
-	else
-		wiiMoteWrapper->buttonTwo = false;
-	//Check L
-	if (GetAsyncKeyState(76) != 0)
-	{
-		wiiMoteWrapper->degrees -= 1;
-	}
-	/*if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
-		wiiMoteWrapper->degrees = 0;*/
 	physics.updateTimeFactor(timeFctr);
 }
 
@@ -164,7 +156,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-	if (FBO_ENABLED)
+	if (SIM_ENABLED)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboID);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -245,7 +237,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	racetrack_model->draw(noiseShader);
 	physics.world->debugDrawWorld();
 
-	if (FBO_ENABLED)
+	if (SIM_ENABLED)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -279,7 +271,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glUseProgram(0);
 }
 
-void App::setFboEnabled(bool b) { if (b) FBO_ENABLED = false; }
+void App::setSimEnabled(bool b) { if (b) SIM_ENABLED = false; }
 
 glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView) // No Scaling
 {
