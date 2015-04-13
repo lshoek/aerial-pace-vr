@@ -9,7 +9,7 @@
 #include <glm\ext.hpp>
 #include <functional>
 
-const bool FBO_ENABLED = GL_TRUE;
+const bool FBO_ENABLED = !GL_TRUE;
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w;
@@ -186,8 +186,10 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glm::vec4 p1 = modelViewMatrix * glm::vec4(0, 0, 0, 1);
 	glm::vec4 p2 = modelViewMatrix * glm::vec4(0, 0, 1, 1);
 	glm::vec4 direction = p2 - p1;
-	float angle = atan2(direction.z, direction.x);
-	physics.updateCar(angle - (btRadians(180)), wiiMoteWrapper);
+	float angle = atan2(direction.z, direction.x) - btRadians(90);
+	//printf("%f\n", angle);
+	wiiMoteWrapper->degrees = angle;
+	physics.updateCar(wiiMoteWrapper);
 
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;

@@ -43,7 +43,7 @@ public:
 	int Physics::bullet3Init();
 	void addCar();
 	void addFloor(cModel* stage);
-	void updateCar(float, WiiMoteWrapper *);
+	void updateCar(WiiMoteWrapper *);
 	void updateTimeFactor(float);
 
 	static const float MAXFORCE;	
