@@ -2,7 +2,7 @@
 #include <functional>
 #include <math.h>
 
-const float Physics::MAXFORCE = 300.0f;
+const float Physics::MAXFORCE = 200.0f;
 
 Physics::Physics()
 {
@@ -82,7 +82,7 @@ void Physics::addCar(){
 	world->addRigidBody(realCar);
 }
 
-void Physics::updateCar(float angle, WiiMoteWrapper* wiiMoteWrapper)
+void Physics::updateCar( WiiMoteWrapper* wiiMoteWrapper)
 {
 	float deltaspeed = 0;
 	if (wiiMoteWrapper->buttonOne){//speed goes down
@@ -92,7 +92,7 @@ void Physics::updateCar(float angle, WiiMoteWrapper* wiiMoteWrapper)
 		deltaspeed += MAXFORCE * timeFctr;
 	}
 	btVector3 deltaposition(deltaspeed, 0, 0);
-	float rotationFactor = btRadians(wiiMoteWrapper->degrees);
+	float rotationFactor = wiiMoteWrapper->degrees;
 	deltaposition = deltaposition.rotate(btVector3(0, 1, 0), rotationFactor);
 	realCar->applyCentralForce(deltaposition);
 	realCar->activate();
