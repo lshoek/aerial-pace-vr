@@ -28,11 +28,13 @@ App::~App(void)
 
 void App::init(void)
 {
+	setSimEnabled(true);
 	screenSize = glm::vec2(Kernel::getInstance()->getWindowWidth(), Kernel::getInstance()->getWindowHeight());
 	m_pDebugDrawer = new DebugDrawer();
 	m_pDebugDrawer->setDebugMode(3);
 	headDevice.init("MainUserHead");
 	physics.bullet3Init();
+	wiiMoteWrapper->startAngle = btRadians(90);
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
 	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(5.0f));
 	sun_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
@@ -72,7 +74,7 @@ void App::init(void)
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-
+	std::cout << SIM_ENABLED;
 	if (SIM_ENABLED)
 	{
 		glGenTextures(1, &fbo.fboTextureID);
@@ -135,15 +137,19 @@ void App::preFrame(double frameTime, double totalTime)
 			wiiMoteWrapper->buttonOne = false;
 		//Check J
 		if (GetAsyncKeyState(74) != 0)
-			wiiMoteWrapper->degrees += 1;
+			simAngle += 1;
+
 		//Check K
 		if (GetAsyncKeyState(75) != 0)
 			wiiMoteWrapper->buttonTwo = true;
 		else
 			wiiMoteWrapper->buttonTwo = false;
+
 		//Check L
 		if (GetAsyncKeyState(76) != 0)
-			wiiMoteWrapper->degrees -= 1;
+			simAngle -= 1;
+
+		wiiMoteWrapper->degrees = btRadians(simAngle);
 	}
 	physics.updateTimeFactor(timeFctr);
 }
@@ -175,17 +181,19 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glm::vec3 glmCarPosition(-carPosition.x(), -carPosition.y() - 1, -carPosition.z());
 	glm::vec3 glmInvCarPosition(carPosition.x(), carPosition.y() - 1, carPosition.z());
 
-	glm::vec4 p1 = modelViewMatrix * glm::vec4(0, 0, 0, 1);
-	glm::vec4 p2 = modelViewMatrix * glm::vec4(0, 0, 1, 1);
-	glm::vec4 direction = p2 - p1;
-	float angle = atan2(direction.z, direction.x) - btRadians(90);
-	//printf("%f\n", angle);
-	wiiMoteWrapper->degrees = angle;
+	if (!SIM_ENABLED)
+	{
+		glm::vec4 p1 = modelViewMatrix * glm::vec4(0, 0, 0, 1);
+		glm::vec4 p2 = modelViewMatrix * glm::vec4(0, 0, 1, 1);
+		glm::vec4 direction = p2 - p1;
+		float angle = atan2(direction.z, direction.x);
+		wiiMoteWrapper->degrees = angle;
+	}
 	physics.updateCar(wiiMoteWrapper);
 
 	// Mvp
 	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	mvp = glm::rotate(mvp, -btRadians(wiiMoteWrapper->degrees+90), glm::vec3(0, 1, 0));
+	mvp = glm::rotate(mvp, -wiiMoteWrapper->degrees-90, glm::vec3(0, 1, 0));
 	mvp = glm::translate(mvp, glmCarPosition);
 
 	// Sun
@@ -224,7 +232,6 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 
 	// Racetrack
 	noiseShader->use();
-	glUniform1i(noiseShader->getUniformLocation("s_normals"), 0);
 	glBindTexture(GL_TEXTURE_2D, normals_texture->tid());
 	noiseShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	noiseShader->setUniformVec3("light.position", pointLight.position);
@@ -274,7 +281,7 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 }
 
 
-void App::setSimEnabled(bool b) { if (b) SIM_ENABLED = false; }
+void App::setSimEnabled(bool b) { if (b) SIM_ENABLED = true; else SIM_ENABLED = false; }
 
 glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView) // No Scaling
 {

@@ -37,7 +37,8 @@ class App : public Application
 			std::vector<ShaderProgram*> fboShaders;
 			int currentShader = 0;
 		};
-		bool SIM_ENABLED = GL_FALSE;
+		bool SIM_ENABLED = true;
+		float simAngle = 0;
 		PositionalDevice headDevice, cameraDevice;
 		cTexture* normals_texture,* normals_texture2;
 		cModel* cube_model,* checkers_model,* sun_model,* racetrack_model;

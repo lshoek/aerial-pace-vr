@@ -2,7 +2,7 @@
 #include <functional>
 #include <math.h>
 
-const float Physics::MAXFORCE = 200.0f;
+const float Physics::MAXFORCE = 400.0f;
 
 Physics::Physics()
 {
@@ -71,18 +71,18 @@ void Physics::addCar(){
 	}
 	float mass = 1.0f;//kg
 	btVector3 fallInertia;
-	btBoxShape* pBoxShape = new btBoxShape(btVector3(1,1,1));
+	btBoxShape* pBoxShape = new btBoxShape(btVector3(0.5, 0.5, 0.5));
 	btMotionState* m_pMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(-8.6f, 5,7)));
 	pBoxShape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, m_pMotionState, pBoxShape, fallInertia);
 	realCar = new btRigidBody(rbInfo);
 	btQuaternion newRotation = btQuaternion(btVector3(0, 1.0f, 0), btRadians(0));	
 	realCar->getWorldTransform().setRotation(newRotation);
-	realCar->setFriction(0.5);
+	realCar->setFriction(0.25);
 	world->addRigidBody(realCar);
 }
 
-void Physics::updateCar( WiiMoteWrapper* wiiMoteWrapper)
+void Physics::updateCar(WiiMoteWrapper* wiiMoteWrapper)
 {
 	float deltaspeed = 0;
 	if (wiiMoteWrapper->buttonOne){//speed goes down

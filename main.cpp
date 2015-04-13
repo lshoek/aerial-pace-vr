@@ -4,7 +4,6 @@
 #include "WiiYourself/WiiMoteWrapper.h"
 #include <thread>
 
-
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -21,7 +20,7 @@ int main(int argc, char* argv[])
 			i++;
 			kernel->loadConfig(argv[i]);
 			if (argv[i] != "oculus.json")
-				app->setSimEnabled(GL_TRUE);
+				app->setSimEnabled(true);
 		}
 	}	
 	kernel->setApp(app);

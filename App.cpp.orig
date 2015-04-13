@@ -9,8 +9,10 @@
 #include <glm\ext.hpp>
 #include <functional>
 
-const bool FBO_ENABLED = GL_FALSE;
-
+<<<<<<< HEAD
+=======
+const bool FBO_ENABLED = !GL_TRUE;
+>>>>>>> bd1edf55b24ed422a24afcfe3a87fff81098daa9
 App::App(WiiMoteWrapper* w)
 {
 	wiiMoteWrapper = w;
@@ -19,10 +21,13 @@ App::App(WiiMoteWrapper* w)
 App::~App(void)
 {
 	glUseProgram(0);
-	glDeleteTextures(1, &fbo.fboTextureID);
-	glDeleteTextures(1, &fbo.rboTextureID);
-	glDeleteFramebuffers(1, &fbo.fboID);
-	glDeleteRenderbuffers(1, &fbo.rboID);
+	if (SIM_ENABLED)
+	{
+		glDeleteTextures(1, &fbo.fboTextureID);
+		glDeleteTextures(1, &fbo.rboTextureID);
+		glDeleteFramebuffers(1, &fbo.fboID);
+		glDeleteRenderbuffers(1, &fbo.rboID);
+	}
 }
 
 void App::init(void)
@@ -31,16 +36,15 @@ void App::init(void)
 	m_pDebugDrawer = new DebugDrawer();
 	m_pDebugDrawer->setDebugMode(3);
 	headDevice.init("MainUserHead");
-	cameraDevice.init("CameraPosition");
 	physics.bullet3Init();
 	cube_model = CaveLib::loadModel("data/aerial-pace-vr/models/cube.obj", new ModelLoadOptions(300.0f));
-	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
-	sun_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(10.0f));
+	checkers_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(5.0f));
+	sun_model = CaveLib::loadModel("data/aerial-pace-vr/models/checkers_sphere.obj", new ModelLoadOptions(1.0f));
 	racetrack_model = CaveLib::loadModel("data/aerial-pace-vr/models/racetrack.obj", new ModelLoadOptions(100.0f));
 	normals_texture = CaveLib::loadTexture("data/aerial-pace-vr/textures/normalmap3a.png", new TextureLoadOptions(GL_FALSE));
-	pointLight.position = glm::vec3(60.0f, 20.0f, -10.0f);
+	pointLight.position = glm::vec3(20.0f, 10.0f, 0.0f);
 	pointLight.intensities = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLight.ambientCoefficient = 0.6f;
+	pointLight.ambientCoefficient = 0.75f;
 	pointLight.attentuation = 0.2f;
 	physics.addFloor(racetrack_model);
 
@@ -56,20 +60,10 @@ void App::init(void)
 	airnoiseShader = new ShaderProgram("data/aerial-pace-vr/shaders/airnoise.vert", "data/aerial-pace-vr/shaders/airnoise.frag");
 	airnoiseShader->link();
 
-<<<<<<< HEAD
-	std::vector<string> shaders{ "normalpostprocess", "blur", "threshold", "mirror1", "mirror2", "shining" };
-=======
-	std::vector<string> shaders;
-	shaders.push_back("normalpostprocess");
-	shaders.push_back("blur");
 	//shaders.push_back("threshold");
-	shaders.push_back("mirror1");
-	shaders.push_back("mirror2"); 
-	shaders.push_back("mirror3");
 	//shaders.push_back("draaien");
-	shaders.push_back("shining");
-
->>>>>>> ffc413e2657b1177b7e6433ec6092ec400eb02ed
+	//shaders.push_back("sunprocessing");
+	std::vector<string> shaders{ "normalpostprocess", "blur", "mirror1", "mirror2", "shining" };
 	for each (string shader in shaders)
 		fbo.fboShaders.push_back(new ShaderProgram("data/aerial-pace-vr/shaders/fbo/" + shader + ".vert", "data/aerial-pace-vr/shaders/fbo/" + shader + ".frag"));
 	for each (ShaderProgram* program in fbo.fboShaders)
@@ -78,14 +72,14 @@ void App::init(void)
 		program->setUniformInt("s_texture", 0);
 	}
 
-	physics.world->setDebugDrawer(m_pDebugDrawer);
+	//physics.world->setDebugDrawer(m_pDebugDrawer);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	if (FBO_ENABLED)
+	if (SIM_ENABLED)
 	{
-		glGenTextures(1, &fbo.fboID);
+		glGenTextures(1, &fbo.fboTextureID);
 		glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -96,8 +90,8 @@ void App::init(void)
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenSize.x, screenSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo.fboTextureID, 0);
 		glGenRenderbuffers(1, &fbo.rboID);
-		glGenTextures(1, &fbo.rboTextureID);
-		glBindTexture(1, fbo.rboTextureID);
+		//glGenTextures(1, &fbo.rboTextureID);
+		//glBindTexture(1, fbo.rboTextureID);
 		glBindRenderbuffer(GL_RENDERBUFFER, fbo.rboID);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenSize.x, screenSize.y);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo.rboID);
@@ -123,7 +117,7 @@ void App::preFrame(double frameTime, double totalTime)
 		if (nextTimeToCheck < clock()){
 			fbo.currentShader++;
 			fbo.currentShader %= fbo.fboShaders.size();
-			nextTimeToCheck = clock() + 130;
+			nextTimeToCheck = clock() + 200;
 		}
 	}
 
@@ -132,73 +126,76 @@ void App::preFrame(double frameTime, double totalTime)
 			fbo.currentShader--;
 			if (fbo.currentShader == -1)
 				fbo.currentShader = fbo.fboShaders.size() - 1;
-			nextTimeToCheck = clock() + 130;
+			nextTimeToCheck = clock() + 200;
 		}
 	}
 
-	//Check I
-	if (GetAsyncKeyState(73) != 0)
+	if (SIM_ENABLED)
 	{
-		//wiiMoteWrapper->buttonOne = true;
+		//Check I
+		if (GetAsyncKeyState(73) != 0)
+			wiiMoteWrapper->buttonOne = true;
+		else
+			wiiMoteWrapper->buttonOne = false;
+		//Check J
+		if (GetAsyncKeyState(74) != 0)
+			wiiMoteWrapper->degrees += 1;
+		//Check K
+		if (GetAsyncKeyState(75) != 0)
+			wiiMoteWrapper->buttonTwo = true;
+		else
+			wiiMoteWrapper->buttonTwo = false;
+		//Check L
+		if (GetAsyncKeyState(76) != 0)
+			wiiMoteWrapper->degrees -= 1;
 	}
-	else
-		//wiiMoteWrapper->buttonOne = false;
-	//Check J
-	if (GetAsyncKeyState(74) != 0)
-	{
-		//wiiMoteWrapper->degrees = -30;
-	}
-	//Check K
-	if (GetAsyncKeyState(75) != 0)
-	{
-		//wiiMoteWrapper->buttonTwo = true;
-	}
-	else
-		//wiiMoteWrapper->buttonTwo = false;
-	//Check L
-	if (GetAsyncKeyState(76) != 0)
-	{
-		//wiiMoteWrapper->degrees = 30;
-	}
-	if (GetAsyncKeyState(74) == 0 && GetAsyncKeyState(76) == 0)
-		//wiiMoteWrapper->degrees = 0;
-	physics.updateCar(timeFctr,wiiMoteWrapper);
+	physics.updateTimeFactor(timeFctr);
 }
 
 void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatrix)
 {
-	if (FBO_ENABLED)
+	GLint oldFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFbo);
+
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+	if (SIM_ENABLED)
+	{
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo.fboID);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_COLOR_MATERIAL);
-
 	float mvpRaw[16];
 	physics.realCar->getWorldTransform().getOpenGLMatrix(mvpRaw);
-
-	// Car
-	btVector3 carPosition = physics.realCar->getWorldTransform().getOrigin();
-	glm::vec3 glmCarPosition(-carPosition.x(), -carPosition.y() - 2, -carPosition.z());
-
-	// Devices
-	glm::mat4 headData = headDevice.getData();
-	glm::mat4 viewMatrix = modelViewMatrix * headData;
 
 	// Update the uniform time variable.
 	GLfloat time = GLfloat(clock()) / GLfloat(CLOCKS_PER_SEC);
 
+	// Car
+	btVector3 carPosition = physics.realCar->getWorldTransform().getOrigin();
+	glm::vec3 glmCarPosition(-carPosition.x(), -carPosition.y() - 1, -carPosition.z());
+	glm::vec3 glmInvCarPosition(carPosition.x(), carPosition.y() - 1, carPosition.z());
+
+	glm::vec4 p1 = modelViewMatrix * glm::vec4(0, 0, 0, 1);
+	glm::vec4 p2 = modelViewMatrix * glm::vec4(0, 0, 1, 1);
+	glm::vec4 direction = p2 - p1;
+	float angle = atan2(direction.z, direction.x) - btRadians(90);
+	//printf("%f\n", angle);
+	wiiMoteWrapper->degrees = angle;
+	physics.updateCar(wiiMoteWrapper);
+
 	// Mvp
-	glm::mat4 mvp = projectionMatrix * viewMatrix; // glm::mat4 mvp = projectionMatrix * modelViewMatrix;
-	mvp = glm::rotate(mvp, -physics.realCar->getWorldTransform().getRotation().getAngle(), glm::vec3(0, 1, 0));
+	glm::mat4 mvp = projectionMatrix * modelViewMatrix;
+	mvp = glm::rotate(mvp, -btRadians(wiiMoteWrapper->degrees+90), glm::vec3(0, 1, 0));
 	mvp = glm::translate(mvp, glmCarPosition);
-	//std::cout << glm::to_string(extractCameraPosition(mvp)) << "\n";
 
 	// Sun
-	float scale = 0.3f;
 	glm::mat4 sunMat4 = mvp;
 	sunMat4 = glm::translate(sunMat4, pointLight.position);
-	sunMat4 = glm::scale(sunMat4, glm::vec3(scale, scale, scale));
-	
+
 	// Cube Model (Air)
 	airnoiseShader->use();
 	airnoiseShader->setUniformFloat("time", time);
@@ -208,8 +205,6 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	// Checkers Model
 	simpleShader->use();
 	simpleShader->setUniformInt("s_texture", 0);
-	glUniform1i(simpleShader->getUniformLocation("s_normals"), 1);
-	glBindTexture(GL_TEXTURE_2D, normals_texture->tid());
 	simpleShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	simpleShader->setUniformVec3("light.position", pointLight.position);
 	simpleShader->setUniformVec3("light.intensities", pointLight.intensities);
@@ -218,11 +213,11 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	simpleShader->setUniformFloat("time", time);
 	simpleShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	simpleShader->setUniformFloat("materialShininess", 5.0f);
-	simpleShader->setUniformVec3("cameraPosition", glmCarPosition);
+	simpleShader->setUniformVec3("cameraPosition", glmInvCarPosition);
 	simpleShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	checkers_model->draw(simpleShader);
 
-	// Sun
+	// Sun 
 	sunShader->use();
 	sunShader->setUniformMatrix4("modelViewMatrix", modelViewMatrix);
 	sunShader->setUniformFloat("time", time);
@@ -242,18 +237,19 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	noiseShader->setUniformFloat("light.ambientCoefficient", pointLight.ambientCoefficient);
 	noiseShader->setUniformFloat("time", time);
 	noiseShader->setUniformVec3("materialSpecularColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	noiseShader->setUniformVec3("cameraPosition", glmCarPosition);
+	noiseShader->setUniformVec3("cameraPosition", glmInvCarPosition);
 	noiseShader->setUniformFloat("materialShininess", 5.0f);
 	noiseShader->setUniformMatrix4("modelViewProjectionMatrix", mvp);
 	racetrack_model->draw(noiseShader);
 	physics.world->debugDrawWorld();
 
-	if (FBO_ENABLED)
+	if (SIM_ENABLED)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glViewport(0, 0, screenSize.x, screenSize.y);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
 
 		std::vector<glm::vec2> verts;
 		verts.push_back(glm::vec2(-1, -1));
@@ -267,14 +263,13 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 		curFBOShader->setUniformFloat("time", time);
 		curFBOShader->setUniformVec2("screenSize", screenSize);
 		curFBOShader->setUniformVec3("lightPosition", pointLight.position);
-		curFBOShader->setUniformMatrix4("mvp", modelViewMatrix);
 		//curFBOShader->setUniformInt("s_texture", 0);
 		glBindVertexArray(0);
-		glEnableVertexAttribArray(0);							// en vertex attribute 1
-		glDisableVertexAttribArray(1);							// disable vertex attribute 1
-		glDisableVertexAttribArray(2);							// disable vertex attribute 1
+		glEnableVertexAttribArray(0);                                                   // en vertex attribute 1
+		glDisableVertexAttribArray(1);                                                  // disable vertex attribute 1
+		glDisableVertexAttribArray(2);                                                  // disable vertex attribute 1
 		glBindTexture(GL_TEXTURE_2D, fbo.fboTextureID);
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);									//geef aan dat de posities op deze locatie zitten
+		glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * 4, &verts[0]);                                                                 //geef aan dat de posities op deze locatie zitten
 		glDrawArrays(GL_QUADS, 0, verts.size());
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glDisableVertexAttribArray(0);
@@ -282,8 +277,9 @@ void App::draw(const glm::mat4 &projectionMatrix, const glm::mat4 &modelViewMatr
 	glUseProgram(0);
 }
 
-// No Scaling
-glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView)
+void App::setSimEnabled(bool b) { if (b) SIM_ENABLED = false; }
+
+glm::vec3 App::extractCameraPosition(const glm::mat4 &modelView) // No Scaling
 {
 	glm::mat3 rotMat = glm::mat3(modelView);
 	glm::vec3 d(modelView[3]);

@@ -1,7 +1,5 @@
 #include "WiiMoteWrapper.h"
 #include <mmsystem.h>
-
-
 using namespace std;
 
 
@@ -9,6 +7,7 @@ using namespace std;
 WiiMoteWrapper::WiiMoteWrapper()
 {
 	degrees = 0;
+	startAngle = 0;
 	buttonOne = buttonTwo = buttonHome = false;
 	continueGame = true;
 	status = 0; //0 = wachten 1 = succes -1 = niet succes
@@ -258,7 +257,7 @@ reconnect:
 		//   (using an arbitrary threshold)
 		//if (remote.Acceleration.Orientation.UpdateAge > 10)
 		//	RED;
-		degrees = remote.Acceleration.Orientation.Pitch;
+		degrees = remote.Acceleration.Orientation.Pitch + startAngle;
 		while (degrees > 360.0) degrees -= 360.0;
 		while (degrees < -360.0) degrees += 360.0;
 		/*_tprintf(_T("Pitch:%4ddeg  Roll:%4ddeg  \n")

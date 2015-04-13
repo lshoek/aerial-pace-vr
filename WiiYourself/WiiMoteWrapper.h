@@ -6,7 +6,7 @@ class WiiMoteWrapper
 public:
 	bool continueGame;	
 	void start();
-	float degrees;
+	float degrees, startAngle;
 	bool buttonOne;
 	bool buttonTwo;
 	bool buttonHome;
